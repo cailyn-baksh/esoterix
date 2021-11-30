@@ -1,9 +1,10 @@
-%include "print.S"
+[BITS 16]
 
-hang:
-	jmp hang
+%include "boot.S"
 
 main:
+	mov ax,0xb800
+	mov es,ax
 	call clrscr
 
 	mov si,msg
@@ -12,4 +13,7 @@ main:
 	jmp hang
 
 msg db "Hello World!",0
+
+times 1024-($-$$) db 0
+
 
