@@ -1,4 +1,31 @@
 [ORG 0x7c00]
+
+; BIOS Parameter Block
+db 0xeb
+db 0x3e
+nop
+
+oemid:				db "BF/M    "
+bytesPerSector:		dw 512
+sectorsPerCluster:	db 1
+reservedSectors:	dw 1
+nFATs:				db 2
+nDirEntries:		dw 224
+nSectors:			dw 2880
+mediaDescriptor:	db 0xF0
+sectorsPerFAT:		dw 9
+sectorsPerTrack:	dw 18
+nHeads:				dw 2
+nHiddenSectors:		dd 0
+nLargeSectors:		dd 0
+driveNumber:		db 0
+db 0  ; Reserved
+signature:			db 0x29
+volumeID:			dd 0xacabacab
+volumeLabel:		db "BF/M Floppy"
+fsType:				db "FAT12   "
+
+; Boot code
 	; init segments
 	xor ax,ax
 	mov ds,ax
@@ -24,7 +51,7 @@
 	call puts
 
 	mov ah,2	; read
-	mov al,1	; 63 sectors
+	mov al,1	; 1 sector
 	mov ch,0	; from cylinder 0
 	mov dh,0	; on head 0
 	mov cl,2
@@ -53,6 +80,8 @@ failmsg db "Loading sectors failed",0
 
 hang:
 	jmp hang
+
+%include "print.inc"
 
 times 510-($-$$) db 0
 db 0x55
