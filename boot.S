@@ -2,7 +2,7 @@
 
 ; BIOS Parameter Block
 db 0xeb
-db 0x3e
+db 0x3c
 nop
 
 oemid:				db "BF/M    "
@@ -36,52 +36,24 @@ fsType:				db "FAT12   "
 
 	cld
 
-	; init text video buffer
-	mov ah,0
-	mov al,3
-	int 0x10	
-
-	mov ax,0xb800
-	mov es,ax
-
 	mov si,bootmsg
-	call puts
-
-	mov si,loadmsg
-	call puts
-
-	mov ah,2	; read
-	mov al,1	; 1 sector
-	mov ch,0	; from cylinder 0
-	mov dh,0	; on head 0
-	mov cl,2
-	xor bx,bx
-	mov es,bx
-	mov bx,0x7e00
-	int 0x13
-	
-	mov ah,1
-	int 0x13
-
-	jc read_failed
-
-	jmp 0x7e00
-
-read_failed:
-	mov ax,0xb800
-	mov es,ax
-	mov si,failmsg
-	call puts
+	call bprint
+	mov bp,15
 	jmp $
 
-bootmsg	db "Booting BF/M",0
-loadmsg db "Loading sectors",0
-failmsg db "Loading sectors failed",0
+bootmsg	db "Starting BF/M",13,10,0
 
-hang:
-	jmp hang
-
-%include "print.inc"
+; Prints the string at si
+bprint:
+	lodsb
+	or al,al
+	jz _end@bprint
+	mov ah,0x0E
+	mov bh,0
+	int 0x10
+	jmp bprint
+_end@bprint:
+	ret
 
 times 510-($-$$) db 0
 db 0x55

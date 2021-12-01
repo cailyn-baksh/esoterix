@@ -13,6 +13,7 @@ floppy: build
 	mount -t msdos /dev/loop0 /mnt/bfm-floppy
 	umount /dev/loop0
 	losetup -d /dev/loop0
+	chmod -R 777 bin/
 
 setup:
 	mkdir -p bin
