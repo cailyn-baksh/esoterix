@@ -4,15 +4,15 @@ BrainFuck/Monitor. An 8086 operating system which only runs brainfuck.
 
 ## Building and testing
 
-To build, run the following command
+The project makefile provides functionality to assemble the source files, and to create an image of a 1.44MB floppy disk.
+
+When you first clone the repo, run `sudo make setup` to setup the repo.
+
+To build the code run `make build`. To create a floppy image, run `sudo make floppy`.
+
+To test with qemu, run the following command
 
 ```
-nasm src/main.S -f bin -o bin/bf-m.bin
-```
-
-To test, run
-
-```
-qemu-system-i386 -drive format=raw,file=bin/bf-m.bin
+qemu-system-i386 -fda bin/disk.img
 ```
 

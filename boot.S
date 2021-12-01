@@ -54,8 +54,6 @@ failmsg db "Loading sectors failed",0
 hang:
 	jmp hang
 
-%include "print.S"
-
 times 510-($-$$) db 0
 db 0x55
 db 0xAA

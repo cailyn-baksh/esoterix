@@ -1,6 +1,7 @@
 [BITS 16]
 
 %include "boot.S"
+%include "print.inc"
 
 main:
 	mov ax,0xb800
