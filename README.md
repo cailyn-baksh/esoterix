@@ -13,6 +13,6 @@ To build the code run `make build`. To create a floppy image, run `sudo make flo
 To test with qemu, run the following command
 
 ```
-qemu-system-i386 -fda bin/disk.img
+qemu-system-i386 -blockdev driver=file,node-name=f0,filename=bin/floppy.img -device floppy,drive=f0
 ```
 
