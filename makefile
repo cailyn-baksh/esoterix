@@ -1,9 +1,9 @@
 NAME = bf-m
 
-bin/%.bin: %.S
+bin/%.bin: kernel/%.S
 	nasm -f bin -o $@ $^
 
-build: bin/boot.bin bin/main.bin
+build: bin/boot.bin bin/kernel.bin
 
 floppy: build
 	dd if=/dev/zero of=bin/floppy.img bs=512 count=2880
@@ -17,6 +17,7 @@ floppy: build
 
 setup:
 	mkdir -p bin
+	mkdir -p bin/kernel
 	mkdir -p /mnt/bfm-floppy
 
 clean:

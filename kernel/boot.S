@@ -54,13 +54,10 @@ fsType:				db "FAT12   "
 	mov bx,FAT
 	int 0x13
 
-	clc
-	mov bx,0x0F00
+	mov dx,0x1234
 	call printerr
 
-	stc
-	mov bx,0x1234
-	mov cx,0xabcd
+	mov dx,0xabcd
 	call printerr
 
 hang:
@@ -84,37 +81,18 @@ _end@bprint:
 	ret
 
 ; Reports an error in the following format
-;	Error CODE [at SOURCE]
-; CODE is a hex representation of the value in BX
+;	Err CODE
+; CODE is a hex representation of the value in DX
 ; SOURCE is a hex representation of the value in CX
 ; SOURCE is only included if the Carry flag is set
 ; Carry flag will be cleared
 printerr:
 	; preserve registers and carry flag
 	push si
-	push ax
-	push dx
-	lahf
-	push ax
 _start@printerr:
 	; print start of message
 	mov si,_strerr@printerr
 	call bprint
-
-	mov dx,bx
-	call printDX
-	
-	; restore and test carry flag
-	pop ax
-	sahf
-	jnc _end@printerr
-
-
-	; print end of message
-	mov si,_strsrc@printerr
-	call bprint
-
-	mov dx,cx
 	call printDX
 _end@printerr:
 	; print newline
@@ -122,12 +100,9 @@ _end@printerr:
 	call bprint
 
 	; restore registers
-	pop dx
-	pop ax
 	pop si
 	ret
-_strerr@printerr:	db "Error ",0
-_strsrc@printerr:	db " at ",0
+_strerr@printerr:	db "Err ",0
 
 ; Prints dec representation of AX
 printDX:
