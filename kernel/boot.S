@@ -9,7 +9,7 @@ nop
 oemid:				db "BF/M    "
 bytesPerSector:		dw 512
 sectorsPerCluster:	db 1
-reservedSectors:	dw 1
+reservedSectors:	dw 2
 nFATs:				db 2
 nDirEntries:		dw 224
 nSectors:			dw 2880
@@ -40,25 +40,24 @@ fsType:				db "FAT12   "
 	mov si,bootmsg
 	call bprint
 
-	; Read the FAT
-	mov al,[sectorsPerFAT]
-	mov cl,[nFATs]
-	mul cl  ; put number of sectors to read into al
-	
+	; Read the kernel
 	mov ah,2  ; read
-	mov ch,0  ; cylinder 0
-	mov cl,2  ; from sector 2
-	mov dh,0
-	xor bx,bx
+	mov al,1  ; 1 sector
+	mov cl,2  ; starting from sector 2
+	mov ch,0  ; on cylinder 0
+	mov dh,0  ; head 0
+	xor bx,bx ; to addr 0x500 (start of usable memory)
 	mov es,bx
-	mov bx,FAT
+	mov bx,0x500
 	int 0x13
 
-	mov dx,0x1234
-	call printerr
+	jc kernelLoadFailed
+	jmp 0x500
 
-	mov dx,0xabcd
+kernelLoadFailed:
+	mov dx,0x1
 	call printerr
+	jmp $
 
 hang:
 	jmp $
@@ -154,6 +153,4 @@ CRLF:		db 13,10,0
 times 510-($-$$) db 0
 db 0x55
 db 0xAA
-
-FAT:
 
