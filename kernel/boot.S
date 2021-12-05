@@ -39,17 +39,28 @@ fsType:				db "FAT12   "
 
 	cld
 
+	; store drive number before it gets overwritten
+	mov byte [k_bootDisk],dl
+
 	mov si,bootmsg
 	call bprint
 
+	; detect available ram
+	clc
+	int 0x12
+	jc memDetectFailed
+	sub ax,128  ; subtract size of the EBDA
+	mov word [k_availableRAM],ax
+
+	; load the kernel
 	mov si,loadmsg
 	call bprint
 
-	; Read the kernel
 	mov ah,2  ; read
 	mov al,1  ; 1 sector
 	mov cl,2  ; starting from sector 2
-	mov ch,0  ; on cylinder 0
+	mov dl,[k_bootDisk]  ; on the boot disk
+	mov ch,0  ; cylinder 0
 	mov dh,0  ; head 0
 	xor bx,bx
 	mov es,bx
@@ -59,24 +70,29 @@ fsType:				db "FAT12   "
 	jc kernelLoadFailed
 
 	; Jump to kernel
-	;xor bx,bx
-	;mov es,bx
-	mov bx,panic_jmp_addr
-	mov word [bx],handlePanic
+	mov word [k_panic_jmp_addr],handlePanic  ; give kernel an address to jump to on panic
 	jmp kernel_entry
+
 handlePanic:
 	mov si,kp_msg
 	call bprint
 	call printerr
 	jmp $
 
+memDetectFailed:
+	mov dx,ERR_DETECT_MEM
+	call printerr
+	jmp $
+
 kernelLoadFailed:
-	mov dx,0x1
+	mov dx,ERR_LOAD_KERNEL
 	call printerr
 	jmp $
 
 hang:
 	jmp $
+
+bootDisk: db 0
 
 ; Prints the string at si
 ; si will be moved to the end of the string
@@ -120,16 +136,17 @@ printerr:
 	ret
 _strerr@printerr:	db "Err ",0
 
-; Prints dec representation of AX
+; Prints dec representation of DX
 printDX:
 	push si
-	push cx
+	push ax
 	push bx
+	push cx
 
-	; set di to chars@printAX+3 (end of string)
-	; while di != addrof chars@printAX
+	; set di to chars@printDX+3 (end of string)
+	; while di != addrof chars@printDX
 	;   bx = ax & 0xF
-	;   bl = *[bx + addrof hexchars@printAX]
+	;   bl = *[bx + addrof hexchars@printDX]
 	;   *di = bl
 	;   --di
 	;   ax >>= 4;
@@ -157,8 +174,9 @@ _end@printDX:
 	mov si,di
 	call bprint
 
-	pop bx
 	pop cx
+	pop bx
+	pop ax
 	pop si
 	ret
 _hexchars@printDX:	db "0123456789ABCDEF"

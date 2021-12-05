@@ -12,5 +12,11 @@ int 0x10
 mov sp,kernel_stack  ; gives us 1KiB of stack space below the kernel
 
 ; return
-jmp [panic_jmp_addr]
+mov dx,5
+call panic
+
+; kernel panic
+; error code passed in dx
+panic:
+	jmp [panic_jmp_addr]
 
