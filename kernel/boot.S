@@ -1,6 +1,8 @@
 cpu 8086
 org 0x7c00
 
+%include "kernel.inc"
+
 ; BIOS Parameter Block
 db 0xeb
 db 0x3c
@@ -40,19 +42,33 @@ fsType:				db "FAT12   "
 	mov si,bootmsg
 	call bprint
 
+	mov si,loadmsg
+	call bprint
+
 	; Read the kernel
 	mov ah,2  ; read
 	mov al,1  ; 1 sector
 	mov cl,2  ; starting from sector 2
 	mov ch,0  ; on cylinder 0
 	mov dh,0  ; head 0
-	xor bx,bx ; to addr 0x500 (start of usable memory)
+	xor bx,bx
 	mov es,bx
-	mov bx,0x500
+	mov bx,kernel_entry
 	int 0x13
 
 	jc kernelLoadFailed
-	jmp 0x500
+
+	; Jump to kernel
+	;xor bx,bx
+	;mov es,bx
+	mov bx,panic_jmp_addr
+	mov word [bx],handlePanic
+	jmp kernel_entry
+handlePanic:
+	mov si,kp_msg
+	call bprint
+	call printerr
+	jmp $
 
 kernelLoadFailed:
 	mov dx,0x1
@@ -63,6 +79,7 @@ hang:
 	jmp $
 
 ; Prints the string at si
+; si will be moved to the end of the string
 bprint:
 	push ax
 	push bx
@@ -88,12 +105,12 @@ _end@bprint:
 printerr:
 	; preserve registers and carry flag
 	push si
-_start@printerr:
+	
 	; print start of message
 	mov si,_strerr@printerr
 	call bprint
 	call printDX
-_end@printerr:
+	
 	; print newline
 	mov si,CRLF
 	call bprint
@@ -148,6 +165,8 @@ _hexchars@printDX:	db "0123456789ABCDEF"
 chars@printDX:		db 0,0,0,0,0
 
 bootmsg:	db "Starting BF/M",13,10,0
+loadmsg:	db "Loading Kernel",13,10,0
+kp_msg:		db 13,10,"Kernel Panic",13,10,0
 CRLF:		db 13,10,0
 
 times 510-($-$$) db 0

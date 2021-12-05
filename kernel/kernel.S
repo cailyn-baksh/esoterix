@@ -1,11 +1,16 @@
+%include "kernel.inc"
+
 cpu 8086
-org 0x500
+org kernel_entry
 
 mov al,0x41
 mov ah,0x0E
 mov bh,0
 int 0x10
-jmp $
 
-cli
-times 512-($-$$) db 0
+; set up stack
+mov sp,kernel_stack  ; gives us 1KiB of stack space below the kernel
+
+; return
+jmp [panic_jmp_addr]
+
