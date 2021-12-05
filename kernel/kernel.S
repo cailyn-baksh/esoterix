@@ -18,5 +18,5 @@ call panic
 ; kernel panic
 ; error code passed in dx
 panic:
-	jmp [panic_jmp_addr]
+	jmp [k_panic_jmp_addr]
 
