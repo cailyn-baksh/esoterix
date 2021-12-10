@@ -1,6 +1,6 @@
 # BF/M
 
-BrainFuck/Monitor. An 8086 operating system which only runs brainfuck.
+BrainFuck/Monitor. An 8086 operating system for IBM PCs which only runs brainfuck.
 
 ## Building and testing
 
@@ -13,6 +13,6 @@ To build the code run `make build`. To create a floppy image, run `sudo make flo
 To test with qemu, run the following command
 
 ```
-qemu-system-i386 -blockdev driver=file,node-name=f0,filename=bin/floppy.img -device floppy,drive=f0
+qemu-system-i386 -machine pc-i440fx-1.4 -m 1M -blockdev driver=file,node-name=f0,filename=bin/floppy.img -device floppy,drive=f0
 ```
 

@@ -115,9 +115,6 @@ _end@bprint:
 ; Reports an error in the following format
 ;	Err CODE
 ; CODE is a hex representation of the value in DX
-; SOURCE is a hex representation of the value in CX
-; SOURCE is only included if the Carry flag is set
-; Carry flag will be cleared
 printerr:
 	; preserve registers and carry flag
 	push si
@@ -136,7 +133,7 @@ printerr:
 	ret
 _strerr@printerr:	db "Err ",0
 
-; Prints dec representation of DX
+; Prints hex representation of DX
 printDX:
 	push si
 	push ax

@@ -1,5 +1,5 @@
-kernel_entry		equ 0x920
-kernel_stack		equ 0x900
+kernel_entry		equ 0x1510
+kernel_stack		equ 0x1500  ; 4KiB of stack space
 
 ; define memory locations for kernel parameters
 ; NOTE: the addresses appear to point to the end of the data instead of the stard
@@ -11,4 +11,6 @@ k_availableRAM		equ (kernel_params+5)		; KiB of usable RAM. EBDA should not be i
 ; error codes
 ERR_LOAD_KERNEL		equ 0x1
 ERR_DETECT_MEM		equ 0x2
+
+KP_UNEXPECTED_INT	equ 0x1
 
