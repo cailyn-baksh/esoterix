@@ -6,5 +6,5 @@ SECTIONS
 		KEEP(*(.text.boot))
 		*(.text)
 	}
-	. = ALIGN(4096)
+	. = ALIGN(4096);
 }
