@@ -9,7 +9,7 @@ bin/kernel/%.S.o: kernel/%.S
 
 build: $(OBJS)
 	$(TOOLCHAIN)-ld -T linker.ld -o bin/$(NAME).elf $^
-	$(TOOLCHAIN)-objcopy bin/$(NAME).elf -O binary bin/kernel7.img
+	$(TOOLCHAIN)-objcopy bin/$(NAME).elf -O binary bin/kernel.img
 
 setup:
 	mkdir -p bin
