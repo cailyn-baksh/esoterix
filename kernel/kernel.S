@@ -21,6 +21,7 @@
 @   null terminated string with board name. Since this is the last
 @   element its size is irrelevant
 
+
 @ Raspberry Pi 1
 rpi1_data:
 .byte BOARD_RPI1
@@ -51,15 +52,31 @@ rpi4_data:
 @ Address of hardware data struct
 boardDataStructPtr: .4byte 0
 
-@@@@@ .text.boot  @@@@@
-.section ".text.boot"
+@@@@@   Macros    @@@@@
+@ Reads property from selected HWDATA struct into reg
+.macro gethwdata reg:req property:req
+	ldr \reg,=boardDataStructPtr
+	.ifeqs "\property", "id"
+		ldr \reg,[\reg]
+	.else
+	.ifeqs "\property", "mmio_base"
+		ldr \reg,[\reg, #1]
+	.else
+	.ifeqs "\property", "board_name"
+		ldr \reg,[\reg, #5]
+	.endif  @ cant get .elseif to work with strings
+	.endif
+	.endif
+.endm
+
+@@@@@    .text    @@@@@
+.section ".text"
 
 _start:
 	@ disable all cores except core 0
 	mrc p15,0,r5,c0,c0,5
-	and r5,r5,#3
-	cmp r5,#0
-	bne halt
+	ands r5,r5,#3
+	bne halt  @ halt if corenum & 3 != 0
 
 	@ init stack
 	mov sp,#0x8000
@@ -79,13 +96,13 @@ _start:
 
 	@ Rpi 3
 	mov r4,#0xD03
-	cmp r5,r4
+	cmp r5,r4	
 	beq 3f
 
 	@ Rpi 4
 	mov r4,#0xD08
 	cmp r5,r4
-	beq 3f
+	beq 4f
 
 	@ Unknown board
 	b halt
@@ -108,10 +125,10 @@ _start:
 	@ handle ATAGs
 	bl read_atags
 
-	b kernel_main
+	@ Set up UART1
+	gethwdata r0,"mmio_base"
 
-@@@@@    .text    @@@@@
-.section ".text"
+	b kernel_main
 
 kernel_main:
 	

@@ -32,53 +32,27 @@ read_atags:
 
 	@ Check tag type and determine where to store value
 	cmp r4,#ATAG_CORE			@ if r4 == ATAG_CORE
-	cmpne r4,#ATAG_MEM			@ else if r4 == ATAG_CORE
-	cmpne r4,#ATAG_VIDEOTEXT	@ else if r4 == ATAG_VIDEOTEXT
-	cmpne r4,#ATAG_RAMDISK		@ else if r4 == ATAG_RAMDISK
-	cmpne r4,#ATAG_INITRD2		@ else if r4 == ATAG_INITRD2
-	cmpne r4,#ATAG_SERIAL		@ else if r4 == ATAG_SERIAL
-	cmpne r4,#ATAG_REVISION		@ else if r4 == ATAG_REVISION
-	cmpne r4,#ATAG_VIDEOLFB		@ else if r4 == ATAG_VIDEOLFB
-	cmpne r4,#ATAG_CMDLINE		@ else if r4 == ATAG_CMDLINE
-	cmpne r4,#ATAG_NONE			@ else if r4 == ATAG_NONE
+		
+		beq 3f
+	cmp r4,#ATAG_MEM			@ else if r4 == ATAG_CORE
+		beq 3f
+	cmp r4,#ATAG_VIDEOTEXT		@ else if r4 == ATAG_VIDEOTEXT
+		beq 3f
+	cmp r4,#ATAG_RAMDISK		@ else if r4 == ATAG_RAMDISK
+		beq 3f
+	cmp r4,#ATAG_INITRD2		@ else if r4 == ATAG_INITRD2
+		beq 3f
+	cmp r4,#ATAG_SERIAL			@ else if r4 == ATAG_SERIAL
+		beq 3f
+	cmp r4,#ATAG_REVISION		@ else if r4 == ATAG_REVISION
+		beq 3f
+	cmp r4,#ATAG_VIDEOLFB		@ else if r4 == ATAG_VIDEOLFB
+		beq 3f
+	cmp r4,#ATAG_CMDLINE		@ else if r4 == ATAG_CMDLINE
+		beq 3f
+	cmp r4,#ATAG_NONE			@ else if r4 == ATAG_NONE
+		beq 3f
 2:  @ else	
-
-@	cmp r4,#ATAG_CORE  @ if r4 == ATAG_CORE
-@	ite eq
-@		nop
-@	cmpne r4,#ATAG_MEM  @ else if r4 == ATAG_MEM
-@	ite eq
-@		nop
-@	cmpne r4,#ATAG_VIDEOTEXT  @ else if r4 == ATAG_VIDEOTEXT
-@	ite eq
-@		nop
-@	cmpne r4,#ATAG_RAMDISK  @ else if r4 == ATAG_RAMDISK
-@	ite eq
-@		@ we dont support ramdisks; do nothing
-@		nop
-@	cmpne r4,#ATAG_INITRD2  @ else if r4 == ATAG_INITRD2
-@	ite eq
-@		@ we dont support ramdicks; do nothing
-@		nop
-@	cmpne r4,#ATAG_SERIAL  @ else if r4 == ATAG_SERIAL
-@	ite eq
-@		nop
-@	cmpne r4,#ATAG_REVISION  @ else if r4 == ATAG_REVISION
-@	ite eq
-@		nop
-@	cmpne r4,#ATAG_VIDEOLFB  @ else if r4 == ATAG_VIDEOLFB
-@	ite eq
-@		nop
-@	cmpne r4,#ATAG_CMDLINE  @ else if r4 == ATAG_CMDLINE
-@	ite eq
-@		nop
-@	cmpne r4,#ATAG_NONE  @ else if r4 == ATAG_NONE
-@	ite eq
-@		@ end of list
-@		beq 4f
-@2:	@ else
-@		@ unrecognised tag
-@		nop
 
 3:	@ Read data
 	cmp r6,#0

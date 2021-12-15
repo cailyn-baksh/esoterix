@@ -4,7 +4,6 @@ SECTIONS
 	__start = .;
 	.text :
 	{
-		KEEP(*(.text.boot))
 		*(.text)
 	}
 	. = ALIGN(4096);
