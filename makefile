@@ -4,7 +4,7 @@ OBJS = $(addsuffix .o,$(patsubst %,bin/%,$(SRCS)))
 INCLUDES = include/
 TOOLCHAIN = arm-none-eabi
 
-bin/kernel/%.S.o: kernel/%.S
+bin/kernel/%.s.o: kernel/%.s
 	$(TOOLCHAIN)-as -I kernel -c -o $@ $^
 
 build: $(OBJS)

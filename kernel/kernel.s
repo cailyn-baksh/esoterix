@@ -1,10 +1,12 @@
 .include "board.inc"
+.include "utils.inc"
 
 .global _start
 .global mmio_base
 .global board_type
 
 .extern read_atags
+.extern init_uart1
 
 @@@@@   .rodata   @@@@@
 .section ".rodata"
@@ -54,18 +56,14 @@ boardDataStructPtr: .4byte 0
 
 @@@@@   Macros    @@@@@
 @ Reads property from selected HWDATA struct into reg
-.macro gethwdata reg:req property:req
+.macro gethwdata reg:req,property:req
 	ldr \reg,=boardDataStructPtr
-	.ifeqs "\property", "id"
+	.if "\property"=="id"
 		ldr \reg,[\reg]
-	.else
-	.ifeqs "\property", "mmio_base"
+	.elseif "\property"=="mmio_base"
 		ldr \reg,[\reg, #1]
-	.else
-	.ifeqs "\property", "board_name"
+	.elseif "\property"=="board_name"
 		ldr \reg,[\reg, #5]
-	.endif  @ cant get .elseif to work with strings
-	.endif
 	.endif
 .endm
 
@@ -127,6 +125,7 @@ _start:
 
 	@ Set up UART1
 	gethwdata r0,"mmio_base"
+	bl init_uart1
 
 	b kernel_main
 
