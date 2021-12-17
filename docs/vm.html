@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>VM Docs</title>
+		<link rel="stylesheet" type="text/css" href="docs.css" />
+	</head>
+	<body>
+		<div class="toc">
+			<h2>Table of Contents</h2>
+			<ol>
+				<li><a href="#1.registers">Registers</a>
+					<ol>
+						<li><a href="#1.1.flags_register">Flags Register</li>
+					</ol>
+				</li>
+				<li><a href="#2.memory">Memory</a></li>
+				<li><a href="#3.instructions">Instructions</a></li>
+			</ol>
+		</div>
+		<main>
+			<h1>Virtual Machine</h1>
+
+			<h2 id="1.registers">1. Registers</h2>
+			<p>
+				The virtual machine has 4 registers: <code>pc</code>, <code>sp</code>,
+				<code>r</code>, and <code>flags</code>.
+			</p>
+			<p>
+				<code>pc</code> is the program counter. It refers to the offset in the executable file
+				which is being executed. This register can only be modified indirectly through the branch
+				instruction.
+			</p>
+			<p>
+				<code>sp</code> is the stack pointer. It points to the current cell in memory.
+			</p>
+			<p>
+				<code>r</code> is the general purpose register. It is 1 byte in size.
+			</p>
+
+			<h3 id="#1.1.flags_register">1.1 Flags Register</h3>
+			<p>
+				The <code>flags</code> register is a 4-bit register which contains the following bit flags:
+			</p>
+			<table>
+				<tr>
+					<th>Bit</th>
+					<th>Flag</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td><code>0</code></td>
+					<td>Z</td>
+					<td>Zero flag</td>
+				</tr>
+				<tr>
+					<td><code>1</code></td>
+					<td>N</td>
+					<td>Negative flag</td>
+				</tr>
+				<tr>
+					<td><code>2</code></td>
+					<td>C</td>
+					<td>Carry flag</td>
+				</tr>
+				<tr>
+					<td><code>3</code></td>
+					<td>V</td>
+					<td>Overflow flag</td>
+				</tr>
+			</table>
+
+
+			<h2 id="2.memory">2. Memory</h2>
+			<p>
+				Memory is organized into a finite series of 1 byte cells. The lowest address is 0.
+				<code>sp</code> is initialized to 0 when a program starts.
+			</p>
+
+			<h2 id="3.instructions">3. Instructions</h2>
+
+			<table>
+				<tr>
+					<th>Opcode</th>
+					<th>Instruction</th>
+					<th>Description</th>
+				</tr>
+			</table>
+
+			<h3>Branch instruction</h3>
+			<p>
+				The branch instruction sets <code>pc</code> to the given address if the condition is true.
+			</p>
+			<p>
+				After the opcode, the instruction expects a nybble condition code, followed by an address.
+				The below table describes the nybble condition code. The low 3 bits' value are determined
+				by the condition table. The high bit, called the negate bit, dictates whether the
+				condition should be negated after being evaluated.
+			</p>
+
+			<table>
+				<tr>
+					<th>Bit</th>
+					<td>3</td>
+					<td>2</td>
+					<td>1</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<th>Meaning</th>
+					<td>Negate</td>
+					<td colspan="3">Condition code</td>
+				</tr>
+			</table>
+
+			<br>
+
+			<p>Table of condition codes</p>
+			<table>
+				<tr>
+					<th>Code</th>
+					<th>Test</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td><code>0</code></td>
+					<td>-</td>
+					<td>Always branch</td>
+				</tr>
+				<tr>
+					<td><code>1</code></td>
+					<td>Z</td>
+					<td>Branch if zero flag is set</td>
+				</tr>
+				<tr>
+					<td><code>2</code></td>
+					<td>C</td>
+					<td>Branch if carry flag is set</td>
+				</tr>
+				<tr>
+					<td><code>3</code></td>
+					<td>N</td>
+					<td>Branch if negative flag is set</td>
+				</tr>
+				<tr>
+					<td><code>4</code></td>
+					<td>V</td>
+					<td>Branch if overflow flag is set</td>
+				</tr>
+				<tr>
+					<td><code>5</code></td>
+					<td>N == V</td>
+					<td>Branch if negative flag equals overflow flag</td>
+				</tr>
+			</table>
+		</main>
+	</body>
+</html>

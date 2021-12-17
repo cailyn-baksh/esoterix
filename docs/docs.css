@@ -1,0 +1,66 @@
+body {
+	margin: 0;
+	padding: 0;
+
+	font-family: sans-serif;
+	display: grid;
+	column-gap: 20px;
+	overflow: hidden;
+}
+
+div.toc {
+	padding: 5px;
+
+	position: relative;
+	grid-column: 1;
+	overflow-y: scroll;
+}
+
+main {
+	grid-column: 2;
+
+	overflow-y: scroll;
+
+	height: 100vh;
+}
+
+/* inline styles */
+
+a {
+	color: #007fdd;
+	text-decoration-color: #007fdd00;
+
+	transition: text-decoration-color 100ms linear;
+}
+
+a:visited {
+	color: #8f00dd;
+}
+
+a:hover {
+	text-decoration-color: #007fddff;
+}
+
+a:visited:hover {
+	text-decoration-color: #8f00ddff;
+}
+
+code {
+	padding: 1px 2px;
+	border-radius: 3px;
+
+	background-color: #ccc;
+	font-size: large;
+}
+
+/* Tables */
+table {
+	border-collapse: collapse;
+}
+
+
+table th, table td {
+	border: 1px solid black;
+	padding: 3px;
+	text-align: left;
+}
