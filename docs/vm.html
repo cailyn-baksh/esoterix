@@ -14,11 +14,20 @@
 					</ol>
 				</li>
 				<li><a href="#2.memory">Memory</a></li>
-				<li><a href="#3.instructions">Instructions</a></li>
+				<li><a href="#3.instructions">Instructions</a>
+					<ol>
+						<li><a>Manipulate Flags</a></li>
+						<li><a href="#3.1.branch">Branch</a></li>
+					</ol>
+				</li>
 			</ol>
 		</div>
 		<main>
 			<h1>Virtual Machine</h1>
+			<p>
+				To achieve the goal of only executing esoteric languages, BF/M runs all executables
+				in an esoteric virtual machine.
+			</p>
 
 			<h2 id="1.registers">1. Registers</h2>
 			<p>
@@ -81,18 +90,87 @@
 			<table>
 				<tr>
 					<th>Opcode</th>
-					<th>Instruction</th>
 					<th>Description</th>
+				</tr>
+				<tr>
+					<td><code>0h</code></td>
+					<td>nop</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>Manipulate flags</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>Branch</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>Add immediate to sp</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>Add immediate to cell</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>Add register to cell</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>Bitwise</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>Load cell to register</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>Load immediate to register</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>Store register in cell</td>
 				</tr>
 			</table>
 
-			<h3>Branch instruction</h3>
+			<h3><code>nop</code></h3>
+			<p>
+				Does nothing. <code>nop</code> is always 1 nybble long, and always takes
+				1 cycle to execute.
+			</p>
+
+			<h3 id="3.manipulate-flags">Manipulate Flags</h3>
+			<p>
+				The manipulate flags instruction sets or clears flags. It takes a nybble argument.
+				The low two bits are the flag bit to target. The 2nd bit is whether to set (1) or
+				clear (0) the flag. The high bit is reserved
+			</p>
+
+			<table>
+				<caption>Control nybble</caption>
+				<tr>
+					<th>Bit</th>
+					<td>3</td>
+					<td>2</td>
+					<td>1</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<th>Meaning</th>
+					<td>Reserved</td>
+					<td>Set</td>
+					<td colspan="2">Flag</td>
+				</tr>
+			</table>
+
+			<h3 id="branch">Branch</h3>
 			<p>
 				The branch instruction sets <code>pc</code> to the given address if the condition is true.
 			</p>
 			<p>
 				After the opcode, the instruction expects a nybble condition code, followed by an address.
-				The below table describes the nybble condition code. The low 3 bits' value are determined
+				The below table describes the nybble condition code. The low 3 bits' values are determined
 				by the condition table. The high bit, called the negate bit, dictates whether the
 				condition should be negated after being evaluated.
 			</p>
@@ -114,42 +192,105 @@
 
 			<br>
 
-			<p>Table of condition codes</p>
 			<table>
+				<caption>Branch condition codes</caption>
 				<tr>
 					<th>Code</th>
 					<th>Test</th>
 					<th>Description</th>
 				</tr>
 				<tr>
-					<td><code>0</code></td>
+					<td><code>000</code></td>
 					<td>-</td>
 					<td>Always branch</td>
 				</tr>
 				<tr>
-					<td><code>1</code></td>
+					<td><code>001</code></td>
 					<td>Z</td>
 					<td>Branch if zero flag is set</td>
 				</tr>
 				<tr>
-					<td><code>2</code></td>
+					<td><code>010</code></td>
 					<td>C</td>
 					<td>Branch if carry flag is set</td>
 				</tr>
 				<tr>
-					<td><code>3</code></td>
+					<td><code>011</code></td>
 					<td>N</td>
 					<td>Branch if negative flag is set</td>
 				</tr>
 				<tr>
-					<td><code>4</code></td>
+					<td><code>100</code></td>
 					<td>V</td>
 					<td>Branch if overflow flag is set</td>
 				</tr>
 				<tr>
-					<td><code>5</code></td>
+					<td><code>101</code></td>
 					<td>N == V</td>
 					<td>Branch if negative flag equals overflow flag</td>
+				</tr>
+				<tr>
+					<td><code>110</code></td>
+					<td>-</td>
+					<td>Reserved</td>
+				</tr>
+				<tr>
+					<td><code>111</code></td>
+					<td>-</td>
+					<td>Reserved</td>
+				</tr>
+			</table>
+
+			<h3>Bitwise</h3>
+			<p>
+				There are four bitwise operations provided: nand, arithmetic left shift, arithmetic
+				right shift, and logical right shift. These are all performed by the same opcode.
+			</p>
+			<p>
+				The instruction takes a control nybble (see below table). If the target bit is set,
+				the operation is applied to <code>r</code>. Otherwise it is applied to the current
+				cell. The operation bits' behaviour is described by the bitwise operation codes table.
+			</p>
+
+			<table>
+				<tr>
+					<th>Bit</th>
+					<td>3</td>
+					<td>2</td>
+					<td>1</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<th>Meaning</th>
+					<td></td>
+					<td>Target</td>
+					<td colspan="2">Operation</td>
+				</tr>
+			</table>
+
+			<br>
+
+			<table>
+				<caption>Bitwise operation codes</caption>
+				<tr>
+					<th>Code</th>
+					<th>Operation</th>
+				</tr>
+				<tr>
+					<td><code>00</code></td>
+					<td>NAND</td>
+				</tr>
+				<tr>
+					<td><code>01</code></td>
+					<td>Left shift</td>
+				</tr>
+				<tr>
+					<td><code>10</code></td>
+					<td>Arithmetic right shift</td>
+				</tr>
+				<tr>
+					<td><code>11</code></td>
+					<td>Logical right shift</td>
 				</tr>
 			</table>
 		</main>

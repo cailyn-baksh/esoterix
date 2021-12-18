@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Assembly Docs</title>
+		<link rel="stylesheet" type="text/css" href="docs.css" />
+	</head>
+	<body>
+		<div class="toc">
+			<h2>Table of Contents</h2>
+			<ol>
+				<li>Branch instructions</li>
+				<li>Flag manipulation instructions</li>
+			</ol>
+		</div>
+		<main>
+			<h1>Assembly</h1>
+			<p>
+				The BF/M virtual machine is designed to allow for a wide range of programs to
+				be written for it in esoteric languages, as well as to allow for system utilities,
+				processes, and drivers to be developed on it. Since most esoteric languages are not
+				designed with device drivers and the like in mind, it is necessary to use an assembly
+				language to harness every feature of the virtual machine. This document details the
+				instructions in that language.
+			</p>
+
+			<h2>Branch Instructions</h2>
+			<p>
+				There are a total of 14 branch instructions. With these 14 instructions any condition
+				can be tested.
+			</p>
+
+			<table>
+				<tr>
+					<th>Instruction</th>
+					<th>Semantic meaning</th>
+					<th>Effect</th>
+				</tr>
+				<tr>
+					<td><code>b</code></td>
+					<td>Branch</td>
+					<td>Branch without condition</td>
+				</tr>
+
+				<tr>
+					<td><code>bz</code></td>
+					<td>Branch if zero</td>
+					<td rowspan="2">Branch if zero flag is set</td>
+				</tr>
+				<tr>
+					<td><code>beq</code></td>
+					<td>Branch if equal</td>
+				</tr>
+
+				<tr>
+					<td><code>bnz</code></td>
+					<td>Branch if non-zero</td>
+					<td rowspan="2">Branch if zero flag is not set</td>
+				</tr>
+				<tr>
+					<td><code>bne</code></td>
+					<td>Branch if not equal</td>
+				</tr>
+
+				<tr>
+					<td><code>bc</code></td>
+					<td>Branch if carry</td>
+					<td rowspan="2">Branch if carry flag is set</td>
+				</tr>
+				<tr>
+					<td><code>bhs</code></td>
+					<td>Branch if unsigned higher or same</td>
+				</tr>
+
+				<tr>
+					<td><code>bnc</code></td>
+					<td>Branch if no carry</td>
+					<td rowspan="2">Branch if carry flag is not set</td>
+				</tr>
+				<tr>
+					<td><code>blo</code></td>
+					<td>Branch if unsigned lower</td>
+				</tr>
+
+				<tr>
+					<td><code>bn</code></td>
+					<td>Branch if negative</td>
+					<td>Branch if negative flag is set</td>
+				</tr>
+
+				<tr>
+					<td><code>bp</code></td>
+					<td>Branch if positive</td>
+					<td>Branch if negative flag is clear</td>
+				</tr>
+
+				<tr>
+					<td><code>bo</code></td>
+					<td>Branch if overflow</td>
+					<td>Branch if overflow flag is set</td>
+				</tr>
+
+				<tr>
+					<td><code>bno</code></td>
+					<td>Branch if no overflow</td>
+					<td>Branch if overflow flag is clear</td>
+				</tr>
+
+				<tr>
+					<td><code>bge</code></td>
+					<td>Branch if signed greater than or equal to</td>
+					<td>Branch if negative flag equals overflow flag</td>
+				</tr>
+
+				<tr>
+					<td><code>blt</code></td>
+					<td>Branch if signed less than</td>
+					<td>Branch if negative flag does not equal overflow flag</td>
+				</tr>
+			</table>
+
+			<h2>Flag manipulation instructions</h2>
+			<p>
+				The flag manipulation instructions are used to set or clear flags.
+			</p>
+
+			<table>
+				<tr>
+					<th>Instruction</th>
+					<th>Effect</th>
+				</tr>
+				<tr>
+					<td><code>stz</code></td>
+					<td>Set zero flag</td>
+				</tr>
+				<tr>
+					<td><code>clz</code></td>
+					<td>Clear zero flag</td>
+				</tr>
+				<tr>
+					<td><code>stn</code></td>
+					<td>Set negative flag</td>
+				</tr>
+				<tr>
+					<td><code>cln</code></td>
+					<td>Clear negative flag</td>
+				</tr>
+				<tr>
+					<td><code>stc</code></td>
+					<td>Set carry flag</td>
+				</tr>
+				<tr>
+					<td><code>clc</code></td>
+					<td>Clear carry flag</td>
+				</tr>
+				<tr>
+					<td><code>sto</code></td>
+					<td>Set overflow flag</td>
+				</tr>
+				<tr>
+					<td><code>clo</code></td>
+					<td>Clear overflow flag</td>
+				</tr>
+			</table>
+		</main>
+	</body>
+</html>
