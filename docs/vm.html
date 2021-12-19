@@ -3,35 +3,20 @@
 	<head>
 		<title>VM Docs</title>
 		<link rel="stylesheet" type="text/css" href="docs.css" />
+		<script src="toc.js"></script>
 	</head>
 	<body>
-		<div class="toc">
-			<h2>Table of Contents</h2>
-			<ol>
-				<li><a href="#1.registers">Registers</a>
-					<ol>
-						<li><a href="#1.1.flags_register">Flags Register</li>
-					</ol>
-				</li>
-				<li><a href="#2.memory">Memory</a></li>
-				<li><a href="#3.instructions">Instructions</a>
-					<ol>
-						<li><a>Manipulate Flags</a></li>
-						<li><a href="#3.1.branch">Branch</a></li>
-					</ol>
-				</li>
-			</ol>
-		</div>
+		<div id="toc"></div>
 		<main>
-			<h1>Virtual Machine</h1>
+			<h1 class="toc-exclude">Virtual Machine</h1>
 			<p>
 				To achieve the goal of only executing esoteric languages, BF/M runs all executables
 				in an esoteric virtual machine.
 			</p>
 
-			<h2 id="1.registers">1. Registers</h2>
+			<h2>Registers</h2>
 			<p>
-				The virtual machine has 4 registers: <code>pc</code>, <code>sp</code>,
+				The virtual machine has 4 registers: <code>pc</code>, <code>cp</code>,
 				<code>r</code>, and <code>flags</code>.
 			</p>
 			<p>
@@ -40,13 +25,14 @@
 				instruction.
 			</p>
 			<p>
-				<code>sp</code> is the stack pointer. It points to the current cell in memory.
+				<code>cp</code> is the cell pointer. It contains the address of the current
+				cell in memory.
 			</p>
 			<p>
 				<code>r</code> is the general purpose register. It is 1 byte in size.
 			</p>
 
-			<h3 id="#1.1.flags_register">1.1 Flags Register</h3>
+			<h3>Flags Register</h3>
 			<p>
 				The <code>flags</code> register is a 4-bit register which contains the following bit flags:
 			</p>
@@ -79,13 +65,13 @@
 			</table>
 
 
-			<h2 id="2.memory">2. Memory</h2>
+			<h2>Memory</h2>
 			<p>
 				Memory is organized into a finite series of 1 byte cells. The lowest address is 0.
-				<code>sp</code> is initialized to 0 when a program starts.
+				<code>cp</code> is initialized to 0 when a program starts.
 			</p>
 
-			<h2 id="3.instructions">3. Instructions</h2>
+			<h2>Instructions</h2>
 
 			<table>
 				<tr>
@@ -97,39 +83,39 @@
 					<td>nop</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td><code>1h</code></td>
 					<td>Manipulate flags</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td><code>2h</code></td>
 					<td>Branch</td>
 				</tr>
 				<tr>
-					<td></td>
-					<td>Add immediate to sp</td>
+					<td><code>3h</code></td>
+					<td>Add immediate to cp</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td><code>4h</code></td>
 					<td>Add immediate to cell</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td><code>5h</code></td>
 					<td>Add register to cell</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td><code>6h</code></td>
 					<td>Bitwise</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td><code>7h</code></td>
 					<td>Load cell to register</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td><code>8h</code></td>
 					<td>Load immediate to register</td>
 				</tr>
 				<tr>
-					<td></td>
+					<td><code>9h</code></td>
 					<td>Store register in cell</td>
 				</tr>
 			</table>
@@ -140,7 +126,7 @@
 				1 cycle to execute.
 			</p>
 
-			<h3 id="3.manipulate-flags">Manipulate Flags</h3>
+			<h3>Manipulate Flags</h3>
 			<p>
 				The manipulate flags instruction sets or clears flags. It takes a nybble argument.
 				The low two bits are the flag bit to target. The 2nd bit is whether to set (1) or
@@ -164,7 +150,7 @@
 				</tr>
 			</table>
 
-			<h3 id="branch">Branch</h3>
+			<h3>Branch</h3>
 			<p>
 				The branch instruction sets <code>pc</code> to the given address if the condition is true.
 			</p>
@@ -241,18 +227,32 @@
 				</tr>
 			</table>
 
+			<h3>Add immediate to <code>cp</code></h3>
+			<p>
+				This instruction adds an immediate signed byte to <code>cp</code>.
+			</p>
+
+			<h3>Add immediate to cell</h3>
+			<p>
+				This instruction adds an immediate signed byte to the cell pointed to by
+				<code>cp</code>.
+			</p>
+
+			<h3>Add register to cell</h3>
+			<p>
+				This instruction adds the value in register <code>r</code> to the cell
+				pointed to by <code>cp</code>.
+			</p>
+
 			<h3>Bitwise</h3>
 			<p>
 				There are four bitwise operations provided: nand, arithmetic left shift, arithmetic
 				right shift, and logical right shift. These are all performed by the same opcode.
-			</p>
-			<p>
-				The instruction takes a control nybble (see below table). If the target bit is set,
-				the operation is applied to <code>r</code>. Otherwise it is applied to the current
-				cell. The operation bits' behaviour is described by the bitwise operation codes table.
+				The instruction takes a control nybble (see below table).
 			</p>
 
 			<table>
+				<caption>Bitwise Instruction Control Nybble</caption>
 				<tr>
 					<th>Bit</th>
 					<td>3</td>
@@ -262,13 +262,24 @@
 				</tr>
 				<tr>
 					<th>Meaning</th>
-					<td></td>
+					<td>Source</td>
 					<td>Target</td>
 					<td colspan="2">Operation</td>
 				</tr>
 			</table>
 
-			<br>
+			<p>
+				The source bit selects whether the right hand operand is an immediate byte
+				(<code>0</code>) or <code>r</code> (<code>1</code>).
+			</p>
+			<p>
+				The target bit selects whether the left hand operand and destination of the operation
+				is the current cell (<code>0</code>) or <code>r</code> (<code>1</code>).
+			</p>
+			<p>
+				The operation bits select which bitwise operation to perform, according to the
+				bitwise operation codes table.
+			</p>
 
 			<table>
 				<caption>Bitwise operation codes</caption>
@@ -293,6 +304,21 @@
 					<td>Logical right shift</td>
 				</tr>
 			</table>
+
+			<h3>Load cell to register</h3>
+			<p>
+				Copies the value in the current cell into <code>r</code>.
+			</p>
+
+			<h3>Load immediate to register</h3>
+			<p>
+				Loads an immediate byte into <code>r</code>.
+			</p>
+
+			<h3>Store register in cell</h3>
+			<p>
+				Writes the value in <code>r</code> to the current cell.
+			</p>
 		</main>
 	</body>
 </html>

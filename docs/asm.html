@@ -3,17 +3,12 @@
 	<head>
 		<title>Assembly Docs</title>
 		<link rel="stylesheet" type="text/css" href="docs.css" />
+		<script src="toc.js"></script>
 	</head>
 	<body>
-		<div class="toc">
-			<h2>Table of Contents</h2>
-			<ol>
-				<li>Branch instructions</li>
-				<li>Flag manipulation instructions</li>
-			</ol>
-		</div>
+		<div id="toc"></div>
 		<main>
-			<h1>Assembly</h1>
+			<h1 class="toc-exclude">Assembly</h1>
 			<p>
 				The BF/M virtual machine is designed to allow for a wide range of programs to
 				be written for it in esoteric languages, as well as to allow for system utilities,
@@ -23,7 +18,107 @@
 				instructions in that language.
 			</p>
 
-			<h2>Branch Instructions</h2>
+			<h2>Syntax</h2>
+			<p>
+				Each line may contain 1 instruction. Comments are denoted by a semicolon
+				(<code>;</code>), and may be placed at the end of a line or on a line of their own.
+			</p>
+			<p>
+				Labels are named locations in the code. They do not translate to any instructions
+				when assembled. Labels are used to represent addresses which are determined during
+				assembly. Labels can be any string of valid ASCII characters, terminated by a
+				colon (<code>:</code>). The valid characters for a label are:
+			</p>
+			<ul>
+				<li>Any upper or lower case letter</li>
+				<li>Any digit character (cannot be the first character of a label)</li>
+				<li>Any of the following miscellaneous characters: <code>_@.</code></li>
+			</ul>
+			<p>Label names cannot conflict with any register names or instruction mnemonics.</p>
+			<p>
+				Two registers are provided: <code>cp</code> and <code>r</code>. <code>cp</code> is
+				the pointer to the current cell. <code>r</code> is a general purpose register.
+				<code>cp</code> can be dereferenced using square brackets: <code>[cp]</code>.
+			</p>
+			<p>
+				Immediate values begin with a <code>#</code> and can be in base 16, 10, 8, or 2.
+				Immediate values are parsed from the <code>#</code> until a comma, semicolon,
+				whitespace character, or EOL is reached. The base is then determined by the last
+				character. <code>h</code> is hex, <code>o</code> is octal, <code>b</code> is
+				binary, and no suffix is decimal. An error will be raised by the assembler if a
+				string of digits has a suffix that contradicts the digits in the number.
+			</p>
+
+			<h2>Instructions</h2>
+
+			<table class="center">
+				<caption>Instruction Listing</caption>
+				<tr>
+					<td><code>nop</code></td>
+					<td><code>b <i>addr</i></code></td>
+					<td><code>bz <i>addr</i></code></td>
+					<td><code>beq <i>addr</i></code></td>
+					<td><code>bnz <i>addr</i></code></td>
+					<td><code>bne <i>addr</i></code></td>
+					<td><code>bc <i>addr</i></code></td>
+					<td><code>bhs <i>addr</i></code></td>
+				</tr>
+				<tr>
+					<td><code>bnc <i>addr</i></code></td>
+					<td><code>blo <i>addr</i></code></td>
+					<td><code>bn <i>addr</i></code></td>
+					<td><code>bp <i>addr</i></code></td>
+					<td><code>bo <i>addr</i></code></td>
+					<td><code>bno <i>addr</i></code></td>
+					<td><code>bge <i>addr</i></code></td>
+					<td><code>blt <i>addr</i></code></td>
+				</tr>
+				<tr>
+					<td><code>stz</code></td>
+					<td><code>clz</code></td>
+					<td><code>stn</code></td>
+					<td><code>cln</code></td>
+					<td><code>stc</code></td>
+					<td><code>clc</code></td>
+					<td><code>sto</code></td>
+					<td><code>clo</code></td>
+				</tr>
+				<tr>
+					<td><code>add cp,<i>imm8</i></code></td>
+					<td><code>add [cp],<i>imm8</i></code></td>
+					<td><code>add [cp],r</code></td>
+					<td><code>nand [sp],<i>imm8</i></code></td>
+					<td><code>nand [sp],r</code></td>
+					<td><code>nand r,<i>imm8</i></code></td>
+					<td><code>nand r,r</code></td>
+					<td><code>lsl [sp],<i>imm8</i></code></td>
+				</tr>
+				<tr>
+					<td><code>lsl [sp],r</code></td>
+					<td><code>lsl r,<i>imm8</i></code></td>
+					<td><code>lsl r,r</code></td>
+					<td><code>lsr [sp],<i>imm8</i></code></td>
+					<td><code>lsr [sp],r</code></td>
+					<td><code>lsr r,<i>imm8</i></code></td>
+					<td><code>lsr r,r</code></td>
+					<td><code>asr [sp],<i>imm8</i></code></td>
+				</tr>
+				<tr>
+					<td><code>asr [sp],r</code></td>
+					<td><code>asr r,<i>imm8</i></code></td>
+					<td><code>asr r,r</code></td>
+					<td><code>ldc</code></td>
+					<td><code>ld <i>imm8</i></code></td>
+					<td><code>str</code></td>
+				</tr>
+			</table>
+
+			<h3><code>nop</code></h3>
+			<p>
+				Does nothing.
+			</p>
+
+			<h3>Branch Instructions</h3>
 			<p>
 				There are a total of 14 branch instructions. With these 14 instructions any condition
 				can be tested.
@@ -118,7 +213,7 @@
 				</tr>
 			</table>
 
-			<h2>Flag manipulation instructions</h2>
+			<h3>Flag manipulation instructions</h3>
 			<p>
 				The flag manipulation instructions are used to set or clear flags.
 			</p>
@@ -161,6 +256,107 @@
 					<td>Clear overflow flag</td>
 				</tr>
 			</table>
+
+			<h3>Addition instructions</h3>
+
+			<h4><code>add cp,imm8</code></h4>
+			<p>
+				Adds a signed 8-bit immediate value to the cell pointer.
+			</p>
+
+			<h4><code>add [cp],imm8</code></h4>
+			<p>
+				Adds a signed 8-bit immediate value to the current cell.
+			</p>
+
+			<h4><code>add [cp],r</code></h4>
+			<p>
+				Adds <code>r</code> to current cell.
+			</p>
+
+			<h3>Bitwise instructions</h3>
+			<p>
+				There are four bitwise instructions: <span title="Really i only needed to give you NAND but i chose to be kind and not force you to implement bit shifts with NAND instructions">
+				NAND, left shift, logical right shift, and arithmetic right shift.</span>
+			</p>
+			<p>
+				All bitwise instructions take two operands. The first operand is the left hand operand
+				and the destination of the operation. It can be either <code>[sp]</code> or
+				<code>r</code>. The second operand is the right hand operand, and may be either
+				<code>r</code> or an immediate byte.
+			</p>
+
+			<h4><code>nand</code></h4>
+			<p>
+				The <code>nand</code> instruction performs a bitwise NAND.
+			</p>
+
+			<table>
+				<caption>NAND truth table</caption>
+				<tr>
+					<th>Input A</th>
+					<th>Input B</th>
+					<th>Output</th>
+				</tr>
+				<tr>
+					<td><code>0</code></td>
+					<td><code>0</code></td>
+					<td><code>1</code></td>
+				</tr>
+				<tr>
+					<td><code>0</code></td>
+					<td><code>1</code></td>
+					<td><code>1</code></td>
+				</tr>
+				<tr>
+					<td><code>1</code></td>
+					<td><code>0</code></td>
+					<td><code>1</code></td>
+				</tr>
+				<tr>
+					<td><code>1</code></td>
+					<td><code>1</code></td>
+					<td><code>0</code></td>
+				</tr>
+			</table>
+
+			<p>
+				The NAND gate is a universal logic gate, and thus the <code>nand</code> instruction
+				can be used to construct any other logic instruction. See
+				<a target="_blank" href="https://en.wikipedia.org/wiki/NAND_logic#Making_other_gates_by_using_NAND_gates">here</a>
+				for details on making other gates using NAND.
+			</p>
+
+			<h4><code>lsl</code></h4>
+			<p>
+				The <code>lsl</code> instruction performs a logical left shift.
+			</p>
+
+			<h4><code>lsr</code></h4>
+			<p>
+				The <code>lsr</code> instruction performs a logical right shift.
+			</p>
+
+			<h4><code>asr</code></h4>
+			<p>
+				The <code>asr</code> instruction performs an arithmetic right shift.
+			</p>
+
+			<h3>Load cell to register</h3>
+			<p>
+				The <code>ldc</code> instruction loads the value in the current cell into
+				<code>r</code>.
+			</p>
+
+			<h3>Load immediate to register</h3>
+			<p>
+				The <code>ld</code> instruction loads an immediate byte into <code>r</code>.
+			</p>
+
+			<h3>Store register in cell</h3>
+			<p>
+				The <code>str</code> instruction stores <code>r</code> in the current cell.
+			</p>
 		</main>
 	</body>
 </html>
