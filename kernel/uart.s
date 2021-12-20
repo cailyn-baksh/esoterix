@@ -2,6 +2,7 @@
 .include "utils.inc"
 
 .global init_uart1
+.global uart1_putc
 
 @ nops r0 times
 noploop:
@@ -85,7 +86,28 @@ init_uart1:
 	ldoffset r5,r0,#AUX_MU_CNTL_OFFSET
 	mov r6,#3
 	str r6,[r5]
-	
 
 0:	ldmia sp!, {r5, r6, sl, fp}
 	bx lr
+
+
+@ writes a character to uart1
+@ takes the MMIO base addr in r0, the character in r1
+uart1_putc:
+	stmia sp!, {r4, r5, sl, fp}
+
+	ldoffset r4,r0,#AUX_MU_LSR_OFFSET
+
+1:	nop
+	ldr r5,[r4]
+	tst r5,#0x20
+	beq 1b  @ do while !(AUX_MU_LSR & 0x20)
+
+	@ Write char
+	ldoffset r4,r0,#AUX_MU_IO_OFFSET
+	str r1,[r4]
+
+0:	ldmia sp!, {r4, r5, sl, fp}
+	bx lr
+
+

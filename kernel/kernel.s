@@ -7,6 +7,7 @@
 
 .extern read_atags
 .extern init_uart1
+.extern uart1_putc
 
 @@@@@   .rodata   @@@@@
 .section ".rodata"
@@ -58,6 +59,7 @@ boardDataStructPtr: .4byte 0
 @ Reads property from selected HWDATA struct into reg
 .macro gethwdata reg:req,property:req
 	ldr \reg,=boardDataStructPtr
+	ldr \reg,[\reg]
 	.if "\property"=="id"
 		ldr \reg,[\reg]
 	.elseif "\property"=="mmio_base"
@@ -77,7 +79,8 @@ _start:
 	bne halt  @ halt if corenum & 3 != 0
 
 	@ init stack
-	mov sp,#0x8000
+	ldr r5,=_start
+	mov sp,r5
 	
 	@ check board version
 	mrc p15,0,r5,c0,c0,0
@@ -103,6 +106,7 @@ _start:
 	beq 4f
 
 	@ Unknown board
+	b 2f
 	b halt
 
 1:
@@ -121,11 +125,16 @@ _start:
 	str r3,[r4]
 
 	@ handle ATAGs
-	bl read_atags
+	@bl read_atags
 
 	@ Set up UART1
 	gethwdata r0,"mmio_base"
+	mov r1,#5
+
 	bl init_uart1
+
+	mov r1,#0x41
+	bl uart1_putc
 
 	b kernel_main
 
