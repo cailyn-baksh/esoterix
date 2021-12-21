@@ -8,6 +8,7 @@
 .extern read_atags
 .extern init_uart1
 .extern uart1_putc
+.extern uart1_puts
 
 @@@@@   .rodata   @@@@@
 .section ".rodata"
@@ -49,33 +50,24 @@ rpi4_data:
 .4byte 0xFE000000
 .asciz "Raspi4"
 
+helloStr: .asciz "Hello World!"
+
 @@@@@    .data    @@@@@
 .section ".data"
 
 @ Address of hardware data struct
+.global boardDataStructPtr
 boardDataStructPtr: .4byte 0
-
-@@@@@   Macros    @@@@@
-@ Reads property from selected HWDATA struct into reg
-.macro gethwdata reg:req,property:req
-	ldr \reg,=boardDataStructPtr
-	ldr \reg,[\reg]
-	.if "\property"=="id"
-		ldr \reg,[\reg]
-	.elseif "\property"=="mmio_base"
-		ldr \reg,[\reg, #1]
-	.elseif "\property"=="board_name"
-		ldr \reg,[\reg, #5]
-	.endif
-.endm
 
 @@@@@    .text    @@@@@
 .section ".text"
 
+.org 0x8000
 _start:
 	@ disable all cores except core 0
 	mrc p15,0,r5,c0,c0,5
-	ands r5,r5,#3
+	and r5,r5,#3
+	cmp r5,#0
 	bne halt  @ halt if corenum & 3 != 0
 
 	@ init stack
@@ -128,13 +120,10 @@ _start:
 	@bl read_atags
 
 	@ Set up UART1
-	gethwdata r0,"mmio_base"
-	mov r1,#5
-
 	bl init_uart1
 
-	mov r1,#0x41
-	bl uart1_putc
+	ldr r0,=helloStr
+	bl uart1_puts
 
 	b kernel_main
 
@@ -143,5 +132,5 @@ kernel_main:
 
 halt:
 	wfe
-	b _start
+	b halt
 

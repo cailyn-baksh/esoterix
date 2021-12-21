@@ -54,8 +54,23 @@
 .equiv AUX_MU_MCR_OFFSET,		0x00215050
 .equiv AUX_MU_LSR_OFFSET,		0x00215054
 .equiv AUX_MU_MSR_OFFSET,		0x00215058
+
+
 .equiv AUX_MU_SCRATCH_OFFSET,	0x0021505C
 .equiv AUX_MU_CNTL_OFFSET,		0x00215060
 .equiv AUX_MU_STAT_OFFSET,		0x00215064
 .equiv AUX_MU_BAUD_OFFSET,		0x00215068
+
+@ Reads property from selected HWDATA struct into reg
+.macro gethwdata reg:req,property:req
+	ldr \reg,=boardDataStructPtr
+	ldr \reg,[\reg]
+	.if "\property"=="id"
+		ldr \reg,[\reg]
+	.elseif "\property"=="mmio_base"
+		ldr \reg,[\reg, #1]
+	.elseif "\property"=="board_name"
+		ldr \reg,[\reg, #5]
+	.endif
+.endm
 
