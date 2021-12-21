@@ -129,25 +129,27 @@ uart1_putc:
 @ Takes the address of the string in r0
 uart1_puts:
 	SAVEFRAME
-	push {r4, r5}
+	push {r4}
 	mov r4,r0  @ put string addr in r4, so we dont have to push and mov each loop
 
-	mov r9,#0
-
 1:
-	ldrb r0,[r4,r9]
+	ldrb r0,[r4]
 	cmp r0,#0
 	beq 0f  @ return at null terminator
 
 	bl uart1_putc
 
-	add r9,#1
-
-	@add r0,#1
+	add r4,#1
 	b 1b
 
 0:
-	pop {r4, r5}
+	@ CRLF
+	mov r0,#0x0D
+	bl uart1_putc
+	mov r0,#0x0A
+	bl uart1_putc
+
+	pop {r4}
 	RESTOREFRAME
 	bx lr
 

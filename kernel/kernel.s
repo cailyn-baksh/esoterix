@@ -25,7 +25,6 @@
 @   null terminated string with board name. Since this is the last
 @   element its size is irrelevant
 
-
 @ Raspberry Pi 1
 rpi1_data:
 .byte BOARD_RPI1
@@ -50,7 +49,7 @@ rpi4_data:
 .4byte 0xFE000000
 .asciz "Raspi4"
 
-helloStr: .asciz "Hello World!"
+bootMsgStr: .asciz "Starting BF/M v0.0.1"
 
 @@@@@    .data    @@@@@
 .section ".data"
@@ -122,13 +121,9 @@ _start:
 	@ Set up UART1
 	bl init_uart1
 
-	ldr r0,=helloStr
+	ldr r0,=bootMsgStr
 	bl uart1_puts
 
-	b kernel_main
-
-kernel_main:
-	
 
 halt:
 	wfe
