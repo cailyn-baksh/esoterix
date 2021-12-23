@@ -118,6 +118,14 @@
 					<td><code>9h</code></td>
 					<td>Store register in cell</td>
 				</tr>
+				<tr>
+					<td><code>Ah</code></td>
+					<td>MMIO Read</td>
+				</tr>
+				<tr>
+					<td><code>Bh</code></td>
+					<td>MMIO Write</td>
+				</tr>
 			</table>
 
 			<h3><code>nop</code></h3>
@@ -318,6 +326,17 @@
 			<h3>Store register in cell</h3>
 			<p>
 				Writes the value in <code>r</code> to the current cell.
+			</p>
+
+			<!-- TODO: prevent reading & writing normal memory (consider using 27-bit offsets from 0x7c0000000 instead of addresses) -->
+			<h3>MMIO Read</h3>
+			<p>
+				Reads the byte at the given address into <code>r</code>
+			</p>
+
+			<h3>MMIO Write</h3>
+			<p>
+				Writes <code>r</code> to the given address
 			</p>
 		</main>
 	</body>
