@@ -46,6 +46,8 @@
 .equiv GPPUDCLK1_OFFSET,	0x20009C
 
 @ offsets from MMIO_BASE
+
+@ UART1 offsets
 .equiv AUX_ENABLE_OFFSET,		0x00215004
 .equiv AUX_MU_IO_OFFSET,		0x00215040  @ TODO: figure out what these names stand for and rename them appropriately
 .equiv AUX_MU_IIR_OFFSET,		0x00215044
@@ -60,6 +62,33 @@
 .equiv AUX_MU_CNTL_OFFSET,		0x00215060
 .equiv AUX_MU_STAT_OFFSET,		0x00215064
 .equiv AUX_MU_BAUD_OFFSET,		0x00215068
+
+@ Mailbox offsets
+.equiv MBOX_READ_OFFSET,		0x0000B880
+.equiv MBOX_POLL_OFFSET,		0x0000B890
+.equiv MBOX_SENDER_OFFSET,		0x0000B894
+.equiv MBOX_STATUS_OFFSET,		0x0000B898
+.equiv MBOX_CONFIG_OFFSET,		0x0000B89C
+.equiv MBOX_WRITE_OFFSET,		0x0000B8A0
+
+.equiv MBOX_RESPONSE,			0x80000000
+.equiv MBOX_FULL,				0x80000000
+.equiv MBOX_EMPTY,				0x40000000
+
+.equiv MBOX_REQUEST,		0
+
+.equiv MBOX_CH_POWER,	0
+.equiv MBOX_CH_FB, 		1
+.equiv MBOX_CH_VUART,	2
+.equiv MBOX_CH_VCHIQ,	3
+.equiv MBOX_CH_LEDS,	4
+.equiv MBOX_CH_BTNS,	5
+.equiv MBOX_CH_TOUCH,	6
+.equiv MBOX_CH_COUNT,	7
+.equiv MBOX_CH_PROP,	8
+
+.equiv MBOX_TAG_GETSERIAL,	0x10004
+.equiv MBOX_TAG_LAST,		0
 
 @ Reads property from selected HWDATA struct into reg
 .macro gethwdata reg:req,property:req

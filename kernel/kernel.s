@@ -2,13 +2,12 @@
 .include "utils.inc"
 
 .global _start
-.global mmio_base
-.global board_type
 
 .extern read_atags
 .extern init_uart1
 .extern uart1_putc
 .extern uart1_puts
+.extern mbox_call
 
 @@@@@   .rodata   @@@@@
 .section ".rodata"
@@ -50,6 +49,8 @@ rpi4_data:
 .asciz "Raspi4"
 
 bootMsgStr: .asciz "Starting BF/M v0.0.1"
+failMsgStr: .asciz "mbox failed"
+succMsgStr: .asciz "mbox success"
 
 @@@@@    .data    @@@@@
 .section ".data"
@@ -57,6 +58,12 @@ bootMsgStr: .asciz "Starting BF/M v0.0.1"
 @ Address of hardware data struct
 .global boardDataStructPtr
 boardDataStructPtr: .4byte 0
+
+.global mboxBuffer
+mboxBuffer:
+	.rept 36
+	.4byte 0
+	.endr
 
 @@@@@    .text    @@@@@
 .section ".text"
@@ -124,6 +131,43 @@ _start:
 	ldr r0,=bootMsgStr
 	bl uart1_puts
 
+	@ Test mbox
+	ldr r4,=mboxBuffer
+
+	mov r5,#32
+	str r5,[r4]
+
+	mov r5,#MBOX_REQUEST
+	str r5,[r4,#1]
+
+	mov32 r5,#MBOX_TAG_GETSERIAL
+	str r5,[r4,#2]
+
+	mov r5,#8
+	str r5,[r4,#3]
+	str r5,[r4,#4]
+
+	mov r5,#0
+	str r5,[r4,#5]
+	str r5,[r4,#6]
+
+	mov r5,#MBOX_TAG_LAST
+	str r5,[r4,#7]
+
+	mov r0,#MBOX_CH_PROP
+	bl mbox_call
+
+	cmp r0,#0
+	beq 1f
+	
+	ldr r0,=succMsgStr
+	bl uart1_puts
+	b 2f
+
+1:
+	ldr r0,=failMsgStr
+	bl uart1_puts
+2:
 
 halt:
 	wfe
