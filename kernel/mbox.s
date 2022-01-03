@@ -21,6 +21,7 @@ mbox_call:
 	gethwdata r6,"mmio_base"
 	ldoffset r5,r6,#MBOX_STATUS_OFFSET
 1:
+	@ nop until MBOX_STATUS & MBOX_FULL
 	nop
 	ldr r7,[r5]
 	tst r7,#MBOX_FULL
@@ -34,15 +35,19 @@ mbox_call:
 	ldoffset r5,r6,#MBOX_STATUS_OFFSET
 	ldoffset r6,r6,#MBOX_READ_OFFSET
 2:
+	@ nop until MBOX_STATUS & MBOX_EMPTY
 	nop
 	ldr r7,[r5]
 	tst r7,#MBOX_EMPTY
 	bne 2b
 
-	
+	@ continue loop unless value at MBOX_READ is r4
 	ldr r7,[r6]
 	cmp r4,r7
 	bne 2b
+
+	ldr r0,=bootMsgStr
+	bl uart1_puts
 
 	ldr r7,=mboxBuffer
 	ldr r6,[r7, #4]

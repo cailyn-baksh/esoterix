@@ -2,6 +2,7 @@
 .include "utils.inc"
 
 .global _start
+.global bootMsgStr
 
 .extern read_atags
 .extern init_uart1
@@ -153,6 +154,9 @@ _start:
 
 	mov r5,#MBOX_TAG_LAST
 	str r5,[r4,#7]
+
+	ldr r0,=bootMsgStr
+	bl uart1_puts
 
 	mov r0,#MBOX_CH_PROP
 	bl mbox_call
