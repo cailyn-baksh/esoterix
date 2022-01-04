@@ -79,6 +79,23 @@ _start:
 	@ init stack
 	ldr r5,=_start
 	mov sp,r5
+
+	@ Clear bss
+	ldr r4,=__bss_start
+	ldr r9,=__bss_end
+	mov r5,#0
+	mov r6,#0
+	mov r7,#0
+	mov r8,#0
+	b 2f
+
+1:
+	@ write r5-r8 starting at [r4]
+	stmia r4!,{r5-r8}
+2:
+	@ loop if below __bss_end
+	cmp r4,r9
+	blo 1b
 	
 	@ check board version
 	mrc p15,0,r5,c0,c0,0
@@ -131,44 +148,9 @@ _start:
 	ldr r0,=bootMsgStr
 	bl uart1_puts
 
-	@ Test mbox
-	ldr r4,=mboxBuffer
-
-	mov r5,#32
-	str r5,[r4]
-
-	mov r5,#MBOX_REQUEST
-	str r5,[r4,#1]
-
-	mov32 r5,#MBOX_TAG_GETSERIAL
-	str r5,[r4,#2]
-
-	mov r5,#8
-	str r5,[r4,#3]
-	str r5,[r4,#4]
-
-	mov r5,#0
-	str r5,[r4,#5]
-	str r5,[r4,#6]
-
-	mov r5,#MBOX_TAG_LAST
-	str r5,[r4,#7]
-
-	mov r0,#MBOX_CH_PROP
-	bl mbox_call
-
-	cmp r0,#0
-	beq 1f
+	ldr r4,=kernel_main
+	blx r3
 	
-	ldr r0,=succMsgStr
-	bl uart1_puts
-	b 2f
-
-1:
-	ldr r0,=failMsgStr
-	bl uart1_puts
-2:
-
 halt:
 	wfe
 	b halt
