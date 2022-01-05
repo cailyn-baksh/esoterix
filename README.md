@@ -8,6 +8,7 @@ The objectives of this project are to
  - Produce an operating system which is only capable of running esoteric programming languages
    - By "only capable" we mean that the task of creating a compiler or interpreter for a non-esoteric for this system would be very challenging; that the ABI is more suited to implementing esoteric languages then non-esoteric language. This is likely to be implemented by not allowing code to run directly on the hardware but instead running userspace code in a virtual machine designed for esoteric languages
    - Any compilers or interpreters for this platform would either have to be implemented in an esoteric language themselves, or be dependant on another compiler which outputs binary for an intrinsically esoteric ABI.
+   - This esoteric ABI should be designed to make traditional paradigms difficult to use without making the code tedious to write. It should be minimal and force/encourage alternative paradigms without making the code unreadable or difficult to use in uninteresting ways (for example, requiring all integers be unary instead of binary would be uninteresting).
  - Implement the entire operating system in assembly
    - While C may be more efficient and faster to develop with, i like assembly and think that its fun
    - The goal is to keep the assembly code easy to read, even at the cost of speed or efficiency. Unclear "hacks" should be sparse and well documented

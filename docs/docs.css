@@ -24,7 +24,7 @@ a {
 	color: #007fdd;
 	text-decoration-color: #007fdd00;
 
-	transition: text-decoration-color 100ms linear;
+	transition: text-decoration-color 75ms linear;
 }
 
 a:visited {
@@ -47,6 +47,13 @@ code {
 	font-size: large;
 }
 
+code.subheading {
+	display: block;
+	max-width: 99%;
+	font-size: x-large;
+	margin-bottom: 1.8em;
+}
+
 /* Tables */
 table {
 	border-collapse: collapse;
@@ -54,7 +61,7 @@ table {
 
 table th, table td {
 	border: 1px solid black;
-	padding: 3px;
+	padding: 2px 4px;
 	text-align: left;
 }
 

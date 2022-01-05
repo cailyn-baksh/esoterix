@@ -49,6 +49,97 @@
 				string of digits has a suffix that contradicts the digits in the number.
 			</p>
 
+			<h2>Condition codes</h2>
+			<p>
+				Every instruction can have an optional condition code added to
+				the end of it. This allows instructions to be executed only if
+				the condition is true.
+			</p>
+
+			<table>
+				<caption>Condition Code Suffixes</caption>
+				<tr>
+					<th>Suffix</th>
+					<th>Semantic Meaning</th>
+					<th>Effect</th>
+				</tr>
+				<tr>
+					<td><code>z</code></td>
+					<td>Execute if zero</td>
+					<td rowspan="2">Execute if zero flag is set</td>
+				</tr>
+				<tr>
+					<td><code>eq</code></td>
+					<td>Execute if equal</td>
+				</tr>
+
+				<tr>
+					<td><code>nz</code></td>
+					<td>Execute if non-zero</td>
+					<td rowspan="2">Execute if zero flag is not set</td>
+				</tr>
+				<tr>
+					<td><code>ne</code></td>
+					<td>Execute if not equal</td>
+				</tr>
+
+				<tr>
+					<td><code>c</code></td>
+					<td>Execute if carry</td>
+					<td rowspan="2">Execute if carry flag is set</td>
+				</tr>
+				<tr>
+					<td><code>hs</code></td>
+					<td>Execute if unsigned higher or same</td>
+				</tr>
+
+				<tr>
+					<td><code>nc</code></td>
+					<td>Execute if no carry</td>
+					<td rowspan="2">Execute if carry flag is not set</td>
+				</tr>
+				<tr>
+					<td><code>lo</code></td>
+					<td>Execute if unsigned lower</td>
+				</tr>
+
+				<tr>
+					<td><code>n</code></td>
+					<td>Execute if negative</td>
+					<td>Execute if negative flag is set</td>
+				</tr>
+
+				<tr>
+					<td><code>p</code></td>
+					<td>Execute if positive</td>
+					<td>Execute if negative flag is not set</td>
+				</tr>
+
+				<tr>
+					<td><code>o</code></td>
+					<td>Execute if overflow</td>
+					<td>Execute if overflow flag is set</td>
+				</tr>
+
+				<tr>
+					<td><code>no</code></td>
+					<td>Execute if no overflow</td>
+					<td>Execute if overflow flag is not set</td>
+				</tr>
+
+				<tr>
+					<td><code>ge</code></td>
+					<td>Execute if signed greater than or equal</td>
+					<td>Execute if negative flag equals overflow flag</td>
+				</tr>
+
+				<tr>
+					<td><code>lt</code></td>
+					<td>Execute if signed less than</td>
+					<td>Execute if negative flag does not equal overflow flag</td>
+				</tr>
+			</table>
+
 			<h2>Instructions</h2>
 
 			<table class="center">
@@ -115,105 +206,39 @@
 
 			<h3><code>nop</code></h3>
 			<p>
-				Does nothing.
+				Does nothing. This pseudo-instruction can assemble to any
+				instruction, but will always have a condition code of
+				<code>0h</code>. Usually assemblers will pick the shortest
+				possible instruction, however they can choose longer ones for
+				padding.
 			</p>
 
-			<h3>Branch Instructions</h3>
+			<h3>Branch</h3>
+			<code class="subheading">b <i>label</i></code>
 			<p>
-				There are a total of 14 branch instructions. With these 14 instructions any condition
-				can be tested.
+				<code>b</code>, the branch instruction, branches to a label
+				using a pc-relative offset.
 			</p>
 
-			<table>
-				<tr>
-					<th>Instruction</th>
-					<th>Semantic meaning</th>
-					<th>Effect</th>
-				</tr>
-				<tr>
-					<td><code>b</code></td>
-					<td>Branch</td>
-					<td>Branch without condition</td>
-				</tr>
-
-				<tr>
-					<td><code>bz</code></td>
-					<td>Branch if zero</td>
-					<td rowspan="2">Branch if zero flag is set</td>
-				</tr>
-				<tr>
-					<td><code>beq</code></td>
-					<td>Branch if equal</td>
-				</tr>
-
-				<tr>
-					<td><code>bnz</code></td>
-					<td>Branch if non-zero</td>
-					<td rowspan="2">Branch if zero flag is not set</td>
-				</tr>
-				<tr>
-					<td><code>bne</code></td>
-					<td>Branch if not equal</td>
-				</tr>
-
-				<tr>
-					<td><code>bc</code></td>
-					<td>Branch if carry</td>
-					<td rowspan="2">Branch if carry flag is set</td>
-				</tr>
-				<tr>
-					<td><code>bhs</code></td>
-					<td>Branch if unsigned higher or same</td>
-				</tr>
-
-				<tr>
-					<td><code>bnc</code></td>
-					<td>Branch if no carry</td>
-					<td rowspan="2">Branch if carry flag is not set</td>
-				</tr>
-				<tr>
-					<td><code>blo</code></td>
-					<td>Branch if unsigned lower</td>
-				</tr>
-
-				<tr>
-					<td><code>bn</code></td>
-					<td>Branch if negative</td>
-					<td>Branch if negative flag is set</td>
-				</tr>
-
-				<tr>
-					<td><code>bp</code></td>
-					<td>Branch if positive</td>
-					<td>Branch if negative flag is clear</td>
-				</tr>
-
-				<tr>
-					<td><code>bo</code></td>
-					<td>Branch if overflow</td>
-					<td>Branch if overflow flag is set</td>
-				</tr>
-
-				<tr>
-					<td><code>bno</code></td>
-					<td>Branch if no overflow</td>
-					<td>Branch if overflow flag is clear</td>
-				</tr>
-
-				<tr>
-					<td><code>bge</code></td>
-					<td>Branch if signed greater than or equal to</td>
-					<td>Branch if negative flag equals overflow flag</td>
-				</tr>
-
-				<tr>
-					<td><code>blt</code></td>
-					<td>Branch if signed less than</td>
-					<td>Branch if negative flag does not equal overflow flag</td>
-				</tr>
-			</table>
+			<h3>Jump</h3>
+			<code class="subheading">j <i>addr</i></code>
+			<p>
+				<code>j</code>, the jump instruction, jumps to a label or
+				address by setting the value of <code>pc</code>.
+			</p>
 
 			<h3>Flag manipulation instructions</h3>
+			<code class="subheading">
+				stz<br>
+				stn<br>
+				stc<br>
+				sto<br>
+				clz<br>
+				cln<br>
+				clc<br>
+				clo
+			</code>
+
 			<p>
 				The flag manipulation instructions are used to set or clear flags.
 			</p>
@@ -257,105 +282,143 @@
 				</tr>
 			</table>
 
-			<h3>Addition instructions</h3>
-
-			<h4><code>add cp,imm8</code></h4>
+			<h3>Subtraction</h3>
+			<code class="subheading">sub dst,src</code>
 			<p>
-				Adds a signed 8-bit immediate value to the cell pointer.
-			</p>
-
-			<h4><code>add [cp],imm8</code></h4>
-			<p>
-				Adds a signed 8-bit immediate value to the current cell.
-			</p>
-
-			<h4><code>add [cp],r</code></h4>
-			<p>
-				Adds <code>r</code> to current cell.
-			</p>
-
-			<h3>Bitwise instructions</h3>
-			<p>
-				There are four bitwise instructions: <span title="Really i only needed to give you NAND but i chose to be kind and not force you to implement bit shifts with NAND instructions">
-				NAND, left shift, logical right shift, and arithmetic right shift.</span>
+				<code>sub dst,src</code> &rarr; <code>dst = dst - src</code>
 			</p>
 			<p>
-				All bitwise instructions take two operands. The first operand is the left hand operand
-				and the destination of the operation. It can be either <code>[sp]</code> or
-				<code>r</code>. The second operand is the right hand operand, and may be either
-				<code>r</code> or an immediate byte.
+				<code>dst</code> is the left hand operand and destination of
+				the subtraction. It can be one of <code>dr</code>,
+				<code>cp</code>, or <code>cp</code>.
+			</p>
+			<p>
+				<code>src</code> is the right hand operand of the subtraction.
+				It can be one of <code>dr</code>, <code>[cp]</code>, or an
+				immediate 16-bit value.
 			</p>
 
-			<h4><code>nand</code></h4>
+			<h3>Comparison</h3>
+			<code class="subheading">cmp op1,op2</code>
 			<p>
-				The <code>nand</code> instruction performs a bitwise NAND.
+				The comparison instruction compares two values.
 			</p>
 
-			<table>
-				<caption>NAND truth table</caption>
-				<tr>
-					<th>Input A</th>
-					<th>Input B</th>
-					<th>Output</th>
-				</tr>
-				<tr>
-					<td><code>0</code></td>
-					<td><code>0</code></td>
-					<td><code>1</code></td>
-				</tr>
-				<tr>
-					<td><code>0</code></td>
-					<td><code>1</code></td>
-					<td><code>1</code></td>
-				</tr>
-				<tr>
-					<td><code>1</code></td>
-					<td><code>0</code></td>
-					<td><code>1</code></td>
-				</tr>
-				<tr>
-					<td><code>1</code></td>
-					<td><code>1</code></td>
-					<td><code>0</code></td>
-				</tr>
-			</table>
+			<h3>NAND</h3>
+			<code class="subheading">
+				nand dst,src<br>
+				nandt dst,src
+			</code>
 
 			<p>
-				The NAND gate is a universal logic gate, and thus the <code>nand</code> instruction
-				can be used to construct any other logic instruction. See
-				<a target="_blank" href="https://en.wikipedia.org/wiki/NAND_logic#Making_other_gates_by_using_NAND_gates">here</a>
-				for details on making other gates using NAND.
+				Performs bitwise NAND on <code>dst</code> and <code>src</code>.
+				<code>dst = dst &uarr; src</code>
+			</p>
+			<p>
+				<code>dst</code> may be either <code>[cp]</code> or
+				<code>dr</code>
+			</p>
+			<p>
+				<code>src</code> may be either <code>dr</code> or an immediate
+				16-bit value.
+			</p>
+			<p>
+				<code>nandt</code> stands for NAND-test. It performs the
+				operation and updates flags, but doesn't store the result.
 			</p>
 
-			<h4><code>lsl</code></h4>
+			<h3>Left shift</h3>
+			<code class="subheading">
+				lsl src,dst<br>
+				lslt src,dst
+			</code>
+
 			<p>
-				The <code>lsl</code> instruction performs a logical left shift.
+				Shifts <code>dst</code> left by <code>src</code> bits.
+				<code>dst = dst &lt;&lt; src</code>
+			</p>
+			<p>
+				<code>dst</code> may be either <code>[cp]</code> or
+				<code>dr</code>
+			</p>
+			<p>
+				<code>src</code> may be either <code>dr</code> or an immediate
+				16-bit value.
+			</p>
+			<p>
+				<code>lslt</code> stands for left-shift-test. It performs the
+				operation and updates flags, but doesn't store the result.
 			</p>
 
-			<h4><code>lsr</code></h4>
+			<h3>Logical Right Shift</h3>
+			<code class="subheading">
+				lsl src,dst<br>
+				lsrt src,dst
+			</code>
+
 			<p>
-				The <code>lsr</code> instruction performs a logical right shift.
+				Shifts <code>dst</code> right by <code>src</code> bits, filling
+				the rightmost bits with zeroes.
+				<code>dst = dst &gt;&gt;&gt; src</code>
+			</p>
+			<p>
+				<code>dst</code> may be either <code>[cp]</code> or
+				<code>dr</code>
+			</p>
+			<p>
+				<code>src</code> may be either <code>dr</code> or an immediate
+				16-bit value.
+			</p>
+			<p>
+				<code>lsrt</code> stands for logical-right-shift-test. It
+				performs the operation and updates flags, but doesn't store the
+				result.
 			</p>
 
-			<h4><code>asr</code></h4>
+			<h3>Arithmetic Right Shift</h3>
+			<code class="subheading">
+				asr src,dst<br>
+				asrt src,dst
+			</code>
+
 			<p>
-				The <code>asr</code> instruction performs an arithmetic right shift.
+				Shifts <code>dst</code> right by <code>src</code> bits, filling
+				the rightmost bits copies of the original most significant bit.
+				<code>dst = dst &gt;&gt; src</code>
+			</p>
+			<p>
+				<code>dst</code> may be either <code>[cp]</code> or
+				<code>dr</code>
+			</p>
+			<p>
+				<code>src</code> may be either <code>dr</code> or an immediate
+				16-bit value.
+			</p>
+			<p>
+				<code>asrt</code> stands for arithmetic-right-shift-test. It
+				performs the operation and updates flags, but doesn't store the
+				result.
 			</p>
 
-			<h3>Load cell to register</h3>
-			<p>
-				The <code>ldc</code> instruction loads the value in the current cell into
-				<code>r</code>.
-			</p>
+			<h3>Load data</h3>
+			<code class="subheading">
+				ld dst,src
+			</code>
 
-			<h3>Load immediate to register</h3>
 			<p>
-				The <code>ld</code> instruction loads an immediate byte into <code>r</code>.
+				Loads data from <code>src</code> to <code>dst</code>.
+			</p>
+			<p>
+				<code>dst</code> can be one of <code>dr</code>.
+			</p>
+			<p>
+				<code>src</code> can be one of <code>[cp]</code>, or an
+				immediate 16-bit value.
 			</p>
 
 			<h3>Store register in cell</h3>
 			<p>
-				The <code>str</code> instruction stores <code>r</code> in the current cell.
+				The <code>str</code> instruction stores <code>dr</code> in the current cell.
 			</p>
 		</main>
 	</body>
