@@ -1,9 +1,9 @@
 NAME = bf-m
-SRCS = $(filter-out %.swp %.inc,$(wildcard kernel/*))
+SRCS = $(filter-out %.swp %.inc %.h,$(wildcard kernel/*))
 OBJS = $(addsuffix .o,$(patsubst %,bin/%,$(SRCS)))
 INCLUDES = include/
 TOOLCHAIN = arm-none-eabi
-CFLAGS = -ffreestanding -nostdlib -nostdinc -nostartfiles -O2
+CFLAGS = -march=armv6k -ffreestanding -nostdlib -nostartfiles -O2
 
 bin/kernel/%.c.o: kernel/%.c
 	$(TOOLCHAIN)-gcc $(CFLAGS) -I kernel -c -o $@ $^
@@ -12,7 +12,7 @@ bin/kernel/%.S.o: kernel/%.S
 	$(TOOLCHAIN)-gcc $(CFLAGS) -I kernel -c -o $@ $^
 
 build: $(OBJS)
-	$(TOOLCHAIN)-ld -nostdlib -nostartfiles -T linker.ld -o bin/$(NAME).elf $^
+	$(TOOLCHAIN)-ld -nostdlib -T linker.ld -o bin/$(NAME).elf $^
 	$(TOOLCHAIN)-objcopy bin/$(NAME).elf -O binary bin/kernel.img
 
 setup:

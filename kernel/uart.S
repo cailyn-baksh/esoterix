@@ -1,5 +1,5 @@
-.include "board.inc"
-.include "utils.inc"
+#include "common.h"
+#include "board.h"
 
 .global init_uart1
 .global uart1_putc
@@ -23,7 +23,9 @@ init_uart1:
 	push {r4, r5, r6}
 
 	@ Get MMIO base address
-	gethwdata r4,"mmio_base"
+	ldr r4,=board  @ r4 = ptr to HWData struct
+	ldr r4,[r4]  @ r4 = HWData struct
+	ldoffset r4,r4,#HWData_mmio_base_offset  @ r4 = ptr to MMIO_BASE
 
 	@ AUX_ENABLE register |= 1
 	ldoffset r5,r4,#AUX_ENABLE_OFFSET
@@ -58,7 +60,7 @@ init_uart1:
 
 	@ set baud
 	ldoffset r5,r4,#AUX_MU_BAUD_OFFSET
-	mov r6,#270
+	ldr r6,=270
 	str r6,[r5]
 
 	@ map to gpio pins 14 and 15
@@ -107,7 +109,9 @@ uart1_putc:
 	push {r4, r5, r6}
 
 	@ get MMIO base address
-	gethwdata r6,"mmio_base"
+	ldr r6,=board  @ r6 = ptr to HWData struct
+	ldr r6,[r6]  @ r6 = HWData struct
+	ldoffset r6,r6,#HWData_mmio_base_offset  @ r6 = ptr to MMIO_BASE
 
 	ldoffset r4,r6,#AUX_MU_LSR_OFFSET
 
