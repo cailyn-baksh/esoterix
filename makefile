@@ -1,4 +1,4 @@
-NAME = bf-m
+NAME = esoterix
 SRCS = $(filter-out %.swp %.inc %.h,$(wildcard kernel/*))
 OBJS = $(addsuffix .o,$(patsubst %,bin/%,$(SRCS)))
 INCLUDES = include/

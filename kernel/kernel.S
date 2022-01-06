@@ -12,7 +12,7 @@
 @@@@@   .rodata   @@@@@
 .section ".rodata"
 
-bootMsgStr: .asciz "Starting BF/M v0.0.1"
+bootMsgStr: .asciz "Starting Esoterix v0.0.1"
 failMsgStr: .asciz "mbox failed"
 succMsgStr: .asciz "mbox success"
 
