@@ -1,6 +1,6 @@
-# BF/M
+# Esoterix
 
-BrainFuck/Monitor. A 32-bit OS for the Raspberry Pi which only runs brainfuck.
+A 32-bit OS for the Raspberry Pi which only runs esoteric programming languages. 
 
 ## Objectives
 
@@ -18,4 +18,3 @@ To test, run
 ```
 qemu-system-arm -M raspi2 -serial stdio -kernel bin/kernel7.img
 ```
-
