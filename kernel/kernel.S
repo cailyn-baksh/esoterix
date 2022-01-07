@@ -2,19 +2,13 @@
 #include "board.h"
 
 .global _start
-
-.extern read_atags
-.extern init_uart1
-.extern uart1_putc
-.extern uart1_puts
-.extern uart1_printhex
-.extern mbox_call
+.global panic
 
 @@@@@   .rodata   @@@@@
 .section ".rodata"
 
 CRLF: .byte 0xD,0xA,0x0
-kExitMsgStr: .asciz "Kernel exited with code "
+kPanicStr: .asciz "Kernel panic. Code "
 succMsgStr: .asciz "mbox success"
 
 @@@@@    .data    @@@@@
@@ -58,19 +52,23 @@ _start:
 	ldr r4,=kernel_main
 	blx r4
 
-	@ handle ATAGs
-	@bl read_atags
+halt:
+	wfe
+	b halt
 
-	@ Notify kernel exit
+@ Prints error information to uart1 and halts kernel
+@ Takes an error code in r0
+panic:
 	push {r0}
-	ldr r0,=kExitMsgStr
+
+	ldr r0,kPanicStr
 	bl uart1_puts
+
 	pop {r0}
 	bl uart1_printhex
+
 	ldr r0,=CRLF
 	bl uart1_puts
 
-halt:
-	wfe
 	b halt
 

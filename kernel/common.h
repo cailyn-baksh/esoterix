@@ -30,6 +30,11 @@
 
 typedef unsigned char byte;
 
+/*
+ * Kernel panic. Prints the error code and halts the kernel.
+ */
+void panic(uint32_t code) __attribute__((noreturn));
+
 #endif  // __ASSEMBLER__
 
 #endif  // _COMMON_H_
