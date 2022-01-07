@@ -17,17 +17,31 @@ function constructList(root, list) {
 	}
 }
 
+/*
+ * Performs a 32-bit FNV-1a hash on a string
+ */
+function fnv1a_32(str) {
+	let hash = 2166136261;
+
+	for (const ch of str) {
+		hash = (hash ^ ch.charCodeAt(0));
+		hash = Math.imul(hash, 16777619);
+	}
+
+	return hash >>> 0;
+}
+
 document.addEventListener("DOMContentLoaded", (e) => {
 	let headings = document.querySelectorAll("h1,h2,h3,h4,h5,h6");
 	let toc = document.querySelector("div#toc");
 	let items = [];
-	let rootDepth;
+	let rootDepth = 1;
 
-	for (let i=1; i < headings.length; ++i) {
+	for (let i=0; i < headings.length; ++i) {
 		if (headings[i].classList.contains("toc-exclude")) continue;
 
 		if (headings[i].id === "") {
-			headings[i].id = Number(((Math.floor(Math.random() * 0x10000) << 16) | (Date.now() & 0xFFFF)) >>> 0).toString(16);
+			headings[i].id = fnv1a_32(headings[i].innerHTML).toString(16) + i;
 		}
 
 		let htmlContent;
