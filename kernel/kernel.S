@@ -7,13 +7,14 @@
 .extern init_uart1
 .extern uart1_putc
 .extern uart1_puts
+.extern uart1_printhex
 .extern mbox_call
 
 @@@@@   .rodata   @@@@@
 .section ".rodata"
 
-bootMsgStr: .asciz "Starting Esoterix v0.0.1"
-failMsgStr: .asciz "mbox failed"
+CRLF: .byte 0xD,0xA,0x0
+kExitMsgStr: .asciz "Kernel exited with code "
 succMsgStr: .asciz "mbox success"
 
 @@@@@    .data    @@@@@
@@ -51,60 +52,24 @@ _start:
 	cmp r4,r9
 	blo 1b
 	
-	@ check board version
-	mrc p15,0,r5,c0,c0,0
+	@ store board version in r3
+	mrc p15,0,r3,c0,c0,0
 
-	@ Rpi 1
-	ldr r4,=0xB76
-	cmp r5,r4
-	beq 1f
-
-	@ Rpi 2
-	ldr r4,=0xC07
-	cmp r5,r4
-	beq 2f
-
-	@ Rpi 3
-	ldr r4,=0xD03
-	cmp r5,r4	
-	beq 3f
-
-	@ Rpi 4
-	ldr r4,=0xD08
-	cmp r5,r4
-	beq 4f
-
-	@ Unknown board
-	b 2f
-	b halt
-
-1:
-@	ldr r3,=rpi1_data
-@	b 5f
-2:
-@	ldr r3,=rpi2_data
-@	b 5f
-3:
-@	ldr r3,=rpi3_data
-@	b 5f
-4:
-@	ldr r3,=rpi4_data
-5:
-@	ldr r4,=boardDataStructPtr
-@	str r3,[r4]
+	ldr r4,=kernel_main
+	blx r4
 
 	@ handle ATAGs
 	@bl read_atags
 
-	@ Set up UART1
-	bl init_uart1
-
-	ldr r0,=bootMsgStr
+	@ Notify kernel exit
+	push {r0}
+	ldr r0,=kExitMsgStr
+	bl uart1_puts
+	pop {r0}
+	bl uart1_printhex
+	ldr r0,=CRLF
 	bl uart1_puts
 
-	ldr r4,=kernel_main
-	blx r3
-	
 halt:
 	wfe
 	b halt

@@ -53,20 +53,6 @@
 #define GPPUDCLK0_OFFSET			0x200098
 #define GPPUDCLK1_OFFSET			0x20009C
 
-#define AUX_ENABLE_OFFSET			0x00215004
-#define AUX_MU_IO_OFFSET			0x00215040
-#define AUX_MU_IIR_OFFSET			0x00215044
-#define AUX_MU_IER_OFFSET			0x00215048
-#define AUX_MU_LCR_OFFSET			0x0021504C
-#define AUX_MU_MCR_OFFSET			0x00215050
-#define AUX_MU_LSR_OFFSET			0x00215054
-#define AUX_MU_MSR_OFFSET			0x00215058
-
-#define AUX_MU_SCRATCH_OFFSET		0x0021505C
-#define AUX_MU_CNTL_OFFSET			0x00215060
-#define AUX_MU_STAT_OFFSET			0x00215064
-#define AUX_MU_BAUD_OFFSET			0x00215068
-
 #define MBOX_READ_OFFSET			0x0000B880
 #define MBOX_POLL_OFFSET			0x0000B890
 #define MBOX_SENDER_OFFSET			0x0000B894
@@ -125,7 +111,7 @@ typedef struct __attribute__((__packed__)) {
 #ifndef NOEXTERN
 extern const HWData boards[4];
 
-extern HWData *board;
+extern HWData const *board;
 #endif  // NOEXTERN
 
 #endif  // __ASSEMBLER__

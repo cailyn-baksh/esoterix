@@ -1,9 +1,11 @@
 #include "common.h"
 #include "board.h"
+#include "uart.h"
 
 .global init_uart1
 .global uart1_putc
 .global uart1_puts
+.global uart1_printhex
 
 .section ".text"
 
@@ -23,9 +25,9 @@ init_uart1:
 	push {r4, r5, r6}
 
 	@ Get MMIO base address
-	ldr r4,=board  @ r4 = ptr to HWData struct
-	ldr r4,[r4]  @ r4 = HWData struct
-	ldoffset r4,r4,#HWData_mmio_base_offset  @ r4 = ptr to MMIO_BASE
+	ldr r4,=board  @ r4 = ptr to ptr to HWData struct
+	ldr r4,[r4]  @ r4 = ptr to HWData struct
+	ldr r4,[r4, #HWData_mmio_base_offset]	
 
 	@ AUX_ENABLE register |= 1
 	ldoffset r5,r4,#AUX_ENABLE_OFFSET
@@ -109,9 +111,9 @@ uart1_putc:
 	push {r4, r5, r6}
 
 	@ get MMIO base address
-	ldr r6,=board  @ r6 = ptr to HWData struct
-	ldr r6,[r6]  @ r6 = HWData struct
-	ldoffset r6,r6,#HWData_mmio_base_offset  @ r6 = ptr to MMIO_BASE
+	ldr r6,=board  @ r6 = ptr to ptr to HWData struct
+	ldr r6,[r6]  @ r6 = ptr to HWData struct
+	ldr r6,[r6, #HWData_mmio_base_offset]
 
 	ldoffset r4,r6,#AUX_MU_LSR_OFFSET
 
@@ -147,13 +149,32 @@ uart1_puts:
 	b 1b
 
 0:
-	@ CRLF
-	mov r0,#0x0D
-	bl uart1_putc
-	mov r0,#0x0A
-	bl uart1_putc
-
 	pop {r4}
 	RESTOREFRAME
 	bx lr
+
+@ Prints unsigned hex representation of r0 to uart1
+uart1_printhex:
+	SAVEFRAME
+	mov r2,r0
+
+	@ Start with high nybble
+	mov r1,r2
+	lsr r1,r1,#4
+	ldr r0,=hexchars
+	add r0,r0,r1
+	ldrb r0,[r0]
+	bl uart1_putc
+
+	@ Now print low nybble
+	and r2,r2,#0xF
+	ldr r0,=hexchars
+	add r0,r0,r2
+	ldrb r0,[r0]
+	bl uart1_putc
+
+0:
+	RESTOREFRAME
+	bx lr
+hexchars: .ascii "0123456789abcdef"
 

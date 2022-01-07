@@ -25,5 +25,5 @@ const HWData boards[4] = {
 	}
 };
 
-HWData *board = NULL;
+HWData const *board = NULL;
 
