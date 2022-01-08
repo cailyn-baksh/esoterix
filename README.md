@@ -1,6 +1,22 @@
 # Esoterix
 
-A 32-bit OS for the Raspberry Pi which only runs esoteric programming languages. 
+A 32-bit OS for the Raspberry Pi which only runs esoteric programming languages.
+
+Compatible platforms are:
+ - Raspberry Pi Zero PCB v1.2
+ - Raspberry Pi Zero PCB v1.3
+ - Raspberry Pi Zero W
+ - Raspberry Pi Zero 2 W
+ - Raspberry Pi 1 Model A
+ - Raspberry Pi 1 Model A+
+ - Raspberry Pi 1 Model B
+ - Raspberry Pi 1 Model B+
+ - Raspberry Pi 2 Model B
+ - Raspberry Pi 2 Model B v1.2
+ - Raspberry Pi 3 Model A+
+ - Raspberry Pi 3 Model B
+ - Raspberry Pi 3 Model B+
+ - Raspberry Pi 4 Model B
 
 ## Objectives
 

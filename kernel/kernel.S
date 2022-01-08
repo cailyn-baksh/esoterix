@@ -9,20 +9,18 @@
 
 CRLF: .byte 0xD,0xA,0x0
 kPanicStr: .asciz "Kernel panic. Code "
-succMsgStr: .asciz "mbox success"
 
 @@@@@    .data    @@@@@
 .section ".data"
 
 @@@@@    .text    @@@@@
-.section ".text"
+.section ".text.boot"
 
 .org 0x8000
 _start:
 	@ disable all cores except core 0
 	mrc p15,0,r5,c0,c0,5
-	and r5,r5,#3
-	cmp r5,#0
+	ands r5,r5,#3
 	bne halt  @ halt if corenum & 3 != 0
 
 	@ init stack
@@ -49,6 +47,7 @@ _start:
 	@ store board version in r3
 	mrc p15,0,r3,c0,c0,0
 
+	@ Enter kernel
 	ldr r4,=kernel_main
 	blx r4
 
@@ -56,9 +55,15 @@ halt:
 	wfe
 	b halt
 
+
+.section ".text"
+
 @ Prints error information to uart1 and halts kernel
 @ Takes an error code in r0
+@ When panic is called r10 will contain the error code,
+@ even if panic fails later.
 panic:
+	mov r10,r0  @ Move r0 into r10 in case printing fails
 	push {r0}
 
 	ldr r0,kPanicStr
