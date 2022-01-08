@@ -23,8 +23,6 @@ main {
 a {
 	color: #007fdd;
 	text-decoration-color: #007fdd00;
-
-	transition: text-decoration-color 75ms linear;
 }
 
 a:visited {
@@ -88,4 +86,13 @@ table.center th, table.center td {
 
 #toc li::marker {
 	content: counters(subsections, ".") ". ";
+}
+
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: no-preference) {
+	a {
+		transition: text-decoration-color 75ms linear;
+	}
 }

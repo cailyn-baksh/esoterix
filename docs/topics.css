@@ -16,12 +16,17 @@ a.topic {
 
 	padding: 10px;
 
-	transition: all ease-out 250ms;
-
 	text-decoration: none;
 	color: black;
 }
 
-a.topic:hover {
-	transform: scale(1.02);
+a.topic:hover,
+a.topic:focus {
+	box-shadow: 2px 2px 6px #777;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	a.topic {
+		transition: box-shadow linear 150ms;
+	}
 }
