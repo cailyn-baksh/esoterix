@@ -2,9 +2,10 @@
 
 #include "common.h"
 #include "board.h"
+#include "kparams.h"
 #include "uart.h"
 
-uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t atags, uint32_t r3) {
+uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 	switch ((r3 >> 4) & 0xFFF) {
 		case 0xB76:
 			board = &boards[0];
@@ -23,6 +24,8 @@ uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t atags, uint32_t r3) {
 	init_uart1();
 
 	uart1_puts("Booting " OSNAME " v" OSVER "\r\n");
+
+	handle_kernel_params(r2);
 
 	return 0;
 }
