@@ -7,6 +7,7 @@
 #ifdef __ASSEMBLER__
 /* asm-only */
 
+// TODO: remove and replace these
 // Saves the stack frame when entering a function
 .macro SAVEFRAME
 	mov ip,sp
@@ -16,7 +17,7 @@
 
 // Restores the stack frame when exiting a function
 .macro RESTOREFRAME
-	ldm sp,{fp,sp,lr}
+	ldm sp, {fp,sp,lr}
 .endm
 
 #else

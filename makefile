@@ -3,7 +3,7 @@ SRCS = $(filter-out %.swp %.inc %.h,$(wildcard kernel/*))
 OBJS = $(addsuffix .o,$(patsubst %,bin/%,$(SRCS)))
 INCLUDES = include/
 TOOLCHAIN = arm-none-eabi
-CFLAGS = -march=armv6k -ffreestanding -nostdlib -nostartfiles -O2
+CFLAGS = -march=armv6k -mabi=aapcs -ffreestanding -nostdlib -nostartfiles -O2
 CSTD = c17
 
 bin/kernel/%.c.o: kernel/%.c

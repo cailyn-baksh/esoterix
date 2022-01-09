@@ -28,6 +28,11 @@ void uart1_putc(char);
 void uart1_puts(char *);
 void uart1_printhex(uint32_t val);
 
+/*
+ * Prints a formatted string to UART1
+ */
+void uart1_printf(const char *format, ...);
+
 #endif  // __ASSEMBLER__
 
 #endif  // _UART_H_
