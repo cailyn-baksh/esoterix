@@ -5,6 +5,12 @@
 #include "kparams.h"
 #include "uart.h"
 
+#define NOEXTERN
+#include "errno.h"
+#undef NOEXTERN
+
+uint32_t errno = ENONE;
+
 uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 	switch ((r3 >> 4) & 0xFFF) {
 		case 0xB76:

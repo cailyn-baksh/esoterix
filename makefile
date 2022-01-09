@@ -4,9 +4,10 @@ OBJS = $(addsuffix .o,$(patsubst %,bin/%,$(SRCS)))
 INCLUDES = include/
 TOOLCHAIN = arm-none-eabi
 CFLAGS = -march=armv6k -ffreestanding -nostdlib -nostartfiles -O2
+CSTD = c17
 
 bin/kernel/%.c.o: kernel/%.c
-	$(TOOLCHAIN)-gcc $(CFLAGS) -I kernel -c -o $@ $^
+	$(TOOLCHAIN)-gcc $(CFLAGS) -std=$(CSTD) -I kernel -c -o $@ $^
 
 bin/kernel/%.S.o: kernel/%.S
 	$(TOOLCHAIN)-gcc $(CFLAGS) -I kernel -c -o $@ $^
