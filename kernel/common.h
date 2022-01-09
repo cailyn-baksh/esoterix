@@ -19,16 +19,10 @@
 	ldm sp,{fp,sp,lr}
 .endm
 
-// loads address base+offset into dst
-.macro ldoffset dst:req, base:req, offset:req
-	ldr \dst,=\offset
-	add \dst,\base,\dst
-.endm
-
 #else
 /* C-only */
 
-typedef unsigned char byte;
+#include <stdint.h>
 
 /*
  * Kernel panic. Prints the error code and halts the kernel.

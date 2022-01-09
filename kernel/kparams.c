@@ -1,5 +1,5 @@
 #include "common.h"
-#include "atags.h"
+#include "kparams.h"
 
 void read_atags(void *atags_ptr);
 
@@ -8,13 +8,13 @@ void read_devicetree(void *devtree_ptr);
 void handle_kernel_params(uintptr_t r2) {
 	if (r2 == 0) {
 		// Device tree disabled
-		if (*(0x104) == ATAG_CORE) {
+		if (*(uint32_t *)0x104 == ATAG_CORE) {
 			// ATAGs at 0x100
-			read_atags(0x100);
+			read_atags((void *)0x100);
 		}
-	} else if (*(r2 + 4) == ATAG_CORE) {
+	} else if (*(uint32_t *)(r2+4) == ATAG_CORE) {
 		// r2 points to ATAGS
-		read_atags(r2);
+		read_atags((void *)r2);
 	} else {
 		// devicetree
 		read_devicetree((void *)r2);

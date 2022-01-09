@@ -30,49 +30,67 @@ init_uart1:
 	ldr r4,[r4, #HWData_mmio_base_offset]	
 
 	@ AUX_ENABLE register |= 1
-	ldoffset r5,r4,#AUX_ENABLE_OFFSET
+	ldr r5,=AUX_ENABLE_OFFSET
+	add r5,r4,r5
+	
 	ldr r6,[r5]
 	orr r6,#1
 	str r6,[r5]
 
 	@ AUX_MU_CNTL register = 0
-	ldoffset r5,r4,#AUX_MU_CNTL_OFFSET
+	ldr r5,=AUX_MU_CNTL_OFFSET
+	add r5,r4,r5
+
 	mov r6,#0
 	str r6,[r5] 
 
 	@ AUX_MU_LCR register = 3
-	ldoffset r5,r4,#AUX_MU_LCR_OFFSET
+	ldr r5,=AUX_MU_LCR_OFFSET
+	add r5,r4,r5
+
 	mov r6,#3
 	str r6,[r5]
 
 	@ AUX_MU_MCR register = 0
-	ldoffset r5,r4,#AUX_MU_MCR_OFFSET
+	ldr r5,=AUX_MU_MCR_OFFSET
+	add r5,r4,r5
+
 	mov r6,#0
 	str r6,[r5]
 
 	@ AUX_MU_IER reg = 0
-	ldoffset r5,r4,#AUX_MU_IER_OFFSET
+	ldr r5,=AUX_MU_IER_OFFSET
+	add r5,r4,r5
+
 	mov r6,#0
 	str r6,[r5]
 
 	@ AUX1_MU_IIR reg = 0xc6
-	ldoffset r5,r4,#AUX_MU_IIR_OFFSET
+	ldr r5,=AUX_MU_IIR_OFFSET
+	add r5,r4,r5
+
 	mov r6,#0xc6
 	str r6,[r5]
 
 	@ set baud
-	ldoffset r5,r4,#AUX_MU_BAUD_OFFSET
+	ldr r5,=AUX_MU_BAUD_OFFSET
+	add r5,r4,r5
+
 	ldr r6,=270
 	str r6,[r5]
 
 	@ map to gpio pins 14 and 15
-	ldoffset r5,r4,#GPFSEL1_OFFSET
+	ldr r5,=GPFSEL1_OFFSET
+	add r5,r4,r5
+
 	ldr r6,[r5]
 	bic r6,r6,#0x3F000  @ clear bits 12 to 17
 	orr r6,r6,#(2 << 12) | (2 << 15)
 	str r6,[r5]
 
-	ldoffset r5,r4,#GPPUD_OFFSET
+	ldr r5,=GPPUD_OFFSET
+	add r5,r4,r5
+
 	mov r6,#0
 	str r6,[r5]
 
@@ -81,7 +99,8 @@ init_uart1:
 	bl noploop
 	pop {r0, lr}
 
-	ldoffset r5,r4,#GPPUDCLK0_OFFSET
+	ldr r5,=GPPUDCLK0_OFFSET
+	add r5,r4,r5
 	mov r6,#(1 << 14) | (1 << 15)
 	str r6,[r5]
 
@@ -94,7 +113,8 @@ init_uart1:
 	str r6,[r5]
 
 	@ enable Tx, Rx
-	ldoffset r5,r4,#AUX_MU_CNTL_OFFSET
+	ldr r5,=AUX_MU_CNTL_OFFSET
+	add r5,r4,r5
 	mov r6,#3
 	str r6,[r5]
 
@@ -115,7 +135,8 @@ uart1_putc:
 	ldr r6,[r6]  @ r6 = ptr to HWData struct
 	ldr r6,[r6, #HWData_mmio_base_offset]
 
-	ldoffset r4,r6,#AUX_MU_LSR_OFFSET
+	ldr r4,=AUX_MU_LSR_OFFSET
+	add r4,r6,r4
 
 1:	nop
 	ldr r5,[r4]
@@ -123,7 +144,8 @@ uart1_putc:
 	beq 1b  @ do while !(AUX_MU_LSR & 0x20)
 
 	@ Write char
-	ldoffset r4,r6,#AUX_MU_IO_OFFSET
+	ldr r4,=AUX_MU_IO_OFFSET
+	add r4,r6,r4
 	strb r0,[r4]
 
 0:

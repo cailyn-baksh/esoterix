@@ -102,7 +102,7 @@
  *   A pointer to the beginning of memory-mapped I/O
  */
 typedef struct __attribute__((__packed__)) {
-	byte id;
+	uint8_t id;
 	char name[8];
 	int : 8;  // padding is initialized to 0; so force null terminator
 	void *mmio_base;
