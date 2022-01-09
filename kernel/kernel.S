@@ -64,12 +64,11 @@ halt:
 @ even if panic fails later.
 panic:
 	mov r10,r0  @ Move r0 into r10 in case printing fails
-	push {r0}
 
 	ldr r0,=kPanicStr
 	bl uart1_puts
 
-	pop {r0}
+	mov r0,r10
 	bl uart1_printhex
 
 	ldr r0,=CRLF

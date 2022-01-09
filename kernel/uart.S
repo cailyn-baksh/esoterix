@@ -178,22 +178,21 @@ uart1_puts:
 @ Prints unsigned hex representation of r0 to uart1
 uart1_printhex:
 	SAVEFRAME
-	mov r2,r0
+	mov r1,r0   @ r1 = word to print
+	mov r2,#28  @ r2 = shift amount
 
-	@ Start with high nybble
-	mov r1,r2
-	lsr r1,r1,#4
-	ldr r0,=hexchars
-	add r0,r0,r1
+1:
+	mov r3,r1
+	lsr r3,r3,r2  @ r3 >>= r2
+	and r3,r3,#0xF  @ Clear high bits
+
+	ldr r0,=hexchars  @ uart1_putc(*(&hexchars+r3))
+	add r0,r0,r3
 	ldrb r0,[r0]
 	bl uart1_putc
 
-	@ Now print low nybble
-	and r2,r2,#0xF
-	ldr r0,=hexchars
-	add r0,r0,r2
-	ldrb r0,[r0]
-	bl uart1_putc
+	subs r2,r2,#4  @ Decrease shift amount (and update flags)
+	bpl 1b  @ loop if r2 > 0
 
 0:
 	RESTOREFRAME
