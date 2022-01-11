@@ -231,9 +231,9 @@ uart1_printf:
 	ldrb r0,[r4],#1  @ read byte and increment ptr
 
 	cmp r0,#0  @ Return on null terminator
-	beq 0f
+		beq 0f
 	cmp r0,#'%'  @ Format specifier
-	beq 2f
+		beq 2f
 
 	@ Print the char normally
 	bl _uart1_printf_putc
@@ -243,19 +243,24 @@ uart1_printf:
 	ldrb r0,[r4],#1  @ read next char
 
 	cmp r0,#0  @ Return on null terminator
-	beq 0f
+		beq 0f
 	cmp r0,#'d'  @ Signed integer
 	cmpne r0,#'i'	
 	cmp r0,#'u'  @ Unsigned integer
 	cmp r0,#'x'  @ Hex uint (lower)
+		beq _uart1_printf_fmthexl
 	cmp r0,#'X'  @ Hex uint (upper)
+		beq _uart1_printf_fmthexu
 	cmp r0,#'o'  @ Octal uint
+		beq _uart1_printf_fmtoct
 	cmp r0,#'s'  @ String
-	beq _uart1_printf_fmtstr
-
+		beq _uart1_printf_fmtstr
 	cmp r0,#'c'  @ Character
+		beq _uart1_printf_fmtchr
 	cmp r0,#'p'  @ Pointer
+		beq _uart1_printf_fmtptr
 	cmp r0,#'n'  @ Store number of chars printed
+		beq _uart1_printf_fmtsto
 
 	b 1b
 0:
@@ -276,6 +281,78 @@ _uart1_printf_fmtstr:
 	bl _uart1_printf_putc  @ print char then loop
 	b 50b
 
+@ %c
+_uart1_printf_fmtchr:
+	@ NOTE: if uart1_printf starts misbehaving this could be the cause
+	@ NOTE: since i assumed that chars are padded to 4 bytes, but i cant find
+	@ NOTE: it formally stated anywhere (also this seems to work reliably)
+	ldrb r0,[r5],#4  @ Read character then increment ptr
+	bl _uart1_printf_putc
+	b 1b
+
+@ %x
+_uart1_printf_fmthexl:
+	ldr r3,=_uart1_printf_hexlower
+	b 50f
+@ %X, %p
+_uart1_printf_fmthexu:
+_uart1_printf_fmtptr:  @ TODO: make pointers have leading zeroes
+	ldr r3,=_uart1_printf_hexupper
+
+50:
+	ldr r1,[r5],#4  @ Load word and increment ptr
+	mov r2,#28  @ r2 = shift amount
+
+	cmp r1,#0  @ skip loop if 0
+	bne 51f
+	mov r0,#'0'
+	bl _uart1_printf_putc
+	b 1b
+
+51:
+	mov r0,r1
+	lsrs r0,r0,r2  @ r0 >>= r2
+	beq 52f  @ dont print anything if this is a leading zero
+	and r0,r0,#0xF  @ clear high bits
+	ldrb r0,[r3,r0]  @ load offset from array of hex chars (r0 = [r3+r0])
+	bl _uart1_printf_putc
+
+52:
+	subs r2,r2,#4  @ decrease shift amount and update flags
+	bpl 51b  @ loop while r2 > 0
+
+	b 1b
+
+@ %o
+_uart1_printf_fmtoct:
+	ldr r1,[r5],#4  @ Load word and increment ptr
+	mov r2,#30  @ r2 = shift amount (highest octal digit is truncated to 2 bits in an multiple of 8 word)
+
+	cmp r1,#0  @ skip loop if 0
+	bne 50f
+	mov r0,#'0'
+	bl _uart1_printf_putc
+	b 1b
+
+50:
+	mov r0,r1
+	lsrs r0,r0,r2  @ r0 >>= r2
+	beq 51f  @ dont print anything if this is a leading zero
+	and r0,r0,#7  @ clear high bits
+	orr r0,r0,#0x30  @ convert to ascii
+	bl _uart1_printf_putc
+
+51:
+	subs r2,r2,#3  @ decrease shift amount and update flags
+	bpl 50b
+	b 1b
+
+@ %n
+_uart1_printf_fmtsto:
+	ldr r0,[r5],#4  @ load addr and increment ptr
+	str r6,[r0]
+	b 1b
+
 @ Prints individual character for uart1_printf
 _uart1_printf_putc:
 	push {lr}
@@ -283,4 +360,7 @@ _uart1_printf_putc:
 	add r6,r6,#1  @ increment chars printed counter
 	pop {lr}
 	bx lr
+
+_uart1_printf_hexupper: .ascii "0123456789ABCDEF"
+_uart1_printf_hexlower: .ascii "0123456789abcdef"
 

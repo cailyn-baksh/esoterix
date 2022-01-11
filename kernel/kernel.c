@@ -34,7 +34,13 @@ uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 	handle_kernel_params(r2);
 
 	const char *name = "cailyn";
-	uart1_printf("Hello %s!\r\n", name);
+	unsigned int nChars = 0;
+
+	uart1_printf("Hello %s%c\r\n", name, '!');
+	uart1_printf("%x %X%n\r\n", 0xbaddeed, 0xDEADACE, &nChars);
+	uart1_printf("The last line was 0x%X chars long\r\n", nChars);
+	uart1_printf("nChars is at address %p\r\n", &nChars);
+	uart1_printf("8 in octal is %o, and 1 638 221 485 is %o (should be 14151243255)\r\n", 8, 1638221485);
 
 	return 0;
 }

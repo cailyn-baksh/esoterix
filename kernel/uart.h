@@ -48,7 +48,7 @@ void uart1_printhex(uint32_t val);
  *  p		Pointer
  *  n		Write nothing, but store number of characters printed so far to int ptr
  */
-void uart1_printf(const char *format, ...);
+void uart1_printf(const char *format, ...) __attribute__((format(printf, 1, 2)));
 
 #endif  // __ASSEMBLER__
 
