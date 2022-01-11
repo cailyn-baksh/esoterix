@@ -29,7 +29,24 @@ void uart1_puts(char *);
 void uart1_printhex(uint32_t val);
 
 /*
- * Prints a formatted string to UART1
+ * Simplified printf function for UART1.
+ *
+ * format strings consist of the following syntax
+ *  %type
+ *
+ * Type field
+ *  Value	Description
+ *  %		Literal '%'
+ *  d		Signed integer
+ *  i
+ *  u		Unsigned integer
+ *  x		Hexadecimal unsigned integer (lowercase)
+ *  X		Hexadecimal unsigned integer (uppercase)
+ *  o		Octal unsigned integer
+ *  s		Null-terminated string
+ *  c		Character
+ *  p		Pointer
+ *  n		Write nothing, but store number of characters printed so far to int ptr
  */
 void uart1_printf(const char *format, ...);
 

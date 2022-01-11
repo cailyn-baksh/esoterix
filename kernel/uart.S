@@ -217,280 +217,70 @@ hexchars: .ascii "0123456789abcdef"
 #define PRINTF_LEN_INT_PTRDIFF		0x07  // For int types, ptrdiff_t-sized arg
 #define PRINTF_LEN_FLOAT_LONG		0x08  // For float types, long double-sized arg
 
+@ void uart1_printf(const char *format, ...);
 uart1_printf:
 	push {r1-r3}  @ Push extra arguments onto stack
-	mov r2,sp  @ r2 = start of varargs
-	mov r1,r0  @ r1 = format string
-	@ Save frame
-	push {r4-r8, lr}
+	mov r2,sp  @ remember where varargs begin
+	push {r4-r8, lr}  @ Save registers
+
+	mov r4,r0  @ r4 = pointer to format string
+	mov r5,r2  @ r5 = pointer to next arg
+	mov r6,#0  @ r6 = number of chars printed
 
 1:
-	ldrb r0,[r1]
-	add r1,r1,#1
-
-	cmp r0,#0
-	beq 0f  @ null terminator
-	cmp r0,#'%'
-	beq 2f  @ Format
-
-	@ print the char normally
-	bl uart1_putc
-	b 1b
-
-@ Format
-2:
-	@ r3 is a scratch register
-	mov r4,#0  @ flags
-	mov r5,#0  @ width
-	mov r6,#0  @ precision
-	mov r7,#0  @ length
-
-3:  @ Flags field
-	@ load next char
-	ldrb r0,[r1]
-	add r1,r1,#1
-
-	cmp r0,#0  @ Null terminator
-	beq 0f
-
-	cmp r0,#'-'  @ left align flag
-	orreq r4,r4,#PRINTF_FLAG_LALIGN
-	beq 3b  @ check for another flag
-
-	cmp r0,#'+'  @ Sign flag
-	orreq r4,r4,#PRINTF_FLAG_SIGN
-	beq 3b  @ check for another flag
-
-	cmp r0,#' '  @ Alternate sign flag
-	orreq r4,r4,#PRINTF_FLAG_SIGN2
-	beq 3b  @ check for another flag
-
-	cmp r0,#'0'  @ Zero flag
-	orreq r4,r4,#PRINTF_FLAG_ZERO
-	beq 3b  @ check for another flag
-
-	cmp r0,#'#'  @ Alt flag
-	orreq r4,r4,#PRINTF_FLAG_ALT_FORM
-	beq 3b  @ check for another flag
-
-4:  @ Width Field
-
-	@ if r0 == '*' && r5 == 0
-	cmp r0,#'*'  @ Dynamic value
-	bne 5f  @ test numbers
-	cmp r5,#0
-	bne 1b  @ * is not valid here, stop interpreting format string
-
-	mov r5,#PRINTF_DYNAMIC
-
-	@ Read next char and continue to the next field
-	ldrb r0,[r1]
-	add r1,r1,#1
-
-	cmp r0,#0  @ return on null terminator
-	beq 0f
-
-	b 6f
-
-5:	@ else if r0 >= '0' && r0 <= '9'
-
-	cmp r0,#'0'
-	blt 6f
-	cmp r0,#'9'
-	bgt 6f
-
-	mov r3,#10  @ r5 = r5 * 10
-	mul r5,r5,r3
-	sub r3,r0,#0x30 @ r5 = r5 + int(r0)
-	add r5,r5,r3
-
-	@ load next char and check again
-	ldrb r0,[r1]
-	add r1,r1,#1
-
-	cmp r0,#0  @ null terminator
-	beq 0f
-
-	b 4b
-
-6:  @ precision field
-	cmp r0,#'.'
-	bne 9f  @ no precision field
-
-	@ load next char
-	ldrb r0,[r1]
-	add r1,r1,#1
-	cmp r0,#0  @ return on null terminator
-	beq 0f
-
-7:
-	@ if r0 == '*' && r6 == 0
-	cmp r0,#'*'  @ Dynamic value
-	bne 8f  @ test for numbers
-	cmp r6,#0
-	bne 1b  @ * is not valid here, stop interpreting format string
-
-	@ Dynamic value
-	mov r5,#PRINTF_DYNAMIC
-
-	@ Load next char and move to next field
-	ldrb r0,[r1]
-	add r1,r1,#1
+	ldrb r0,[r4],#1  @ read byte and increment ptr
 
 	cmp r0,#0  @ Return on null terminator
 	beq 0f
+	cmp r0,#'%'  @ Format specifier
+	beq 2f
 
-	b 9f
-
-8:  @ else if r0 >= '0' && r0 <= '9'
-	cmp r0,#'0'
-	blt 9f
-	cmp r0,#'9'
-	bgt 9f
-
-	mov r3,#10  @ r6 = r6 * 10
-	mul r6,r6,r3
-	sub r3,r0,#0x30  @ r6 = r6 + int(r0)
-	add r6,r6,r3
-
-	@ load next char and check again
-	ldrb r0,[r1]
-	add r1,r1,#1
-
-	cmp r0,#0  @ return on null terminator
-	beq 0f
-
-	b 7b
-
-9:  @ length field
-	@ if r0 == 'h'
-	@   if r7 != PRINTF_LEN_INT_SHORT
-	@     r7 = PRINTF_LEN_INT_SHORT
-	@     read next char
-	@     b 9b
-	@   elif r7 == PRINTF_LEN_INT_SHORT
-	@     r7 = PRINTF_LEN_INT_CHAR
-	@     read next char
-	@     b 10f
-	@ if r0 == 'l'
-	@   if r7 != PRINTF_LEN_INT_LONG
-	@     r7 = PRINTF_LEN_INT_LONG
-	@     read next char
-	@     b 9b
-	@   elif r7 != 0
-	@     r7 = PRINTF_LEN_INT_LONG_LONG
-	@     read next char
-	@     b 10f
-	@ if r7 != 0
-	@   invalid
-	@
-	@ if r0 == 'z'
-	@   r7 = PRINTF_LEN_INT_SIZE
-	@ if r0 == 'j'
-	@   r7 = PRINTF_LEN_INT_MAX
-	@ if r0 == 't'
-	@   r7 = PRINTF_LEN_INT_PTRDIFF
-	@ if r0 == 'L'
-	@   r7 = PRINTF_LEN_FLOAT_LONG
-	@
-	@ read next char
-
-	cmp r0,#0  @ return on null terminator
-	beq 0f
-
-	@ if r0 == 'h'
-	cmp r0,#'h'
-	bne 10f  @ go to next if
-	@ if r7 != PRINTF_LEN_INT_SHORT
-	cmp r7,#PRINTF_LEN_INT_SHORT
-	movne r7,#PRINTF_LEN_INT_SHORT
-	ldrbne r0,[r1]  @ Read next character
-	addne r1,r1,#1
-	bne 9b
-	@ elif r7 == PRINTF_LEN_INT_SHORT
-	moveq r7,#PRINTF_LEN_INT_CHAR
-	ldrbeq r0,[r1]  @ Read next character
-	addeq r1,r1,#1
-	beq 12f
-
-10:	@ elif r0 == 'l'
-	cmp r0,#'l'
-	bne 11f  @ go to next if
-	@ if r7 != PRINTF_LEN_INT_LONG
-	cmp r7,#PRINTF_LEN_INT_LONG
-	movne r7,#PRINTF_LEN_INT_LONG
-	ldrbne r0,[r1]  @ Read next character
-	addne r1,r1,#1
-	bne 9b
-	@ elif r7 == PRINTF_LEN_INT_LONG
-	moveq r7,#PRINTF_LEN_INT_LONG_LONG
-	ldrbeq r0,[r1]  @ Read next character
-	addeq r1,r1,#1
-	beq 12f
-	
-11:
-	cmp r7,#0
-	bne 1b  @ Invalid format
-
-	cmp r0,#'z'
-	moveq r7,#PRINTF_LEN_INT_SIZE
-	cmp r0,#'j'
-	moveq r7,#PRINTF_LEN_INT_MAX
-	cmp r0,#'t'
-	moveq r7,#PRINTF_LEN_INT_PTRDIFF
-	cmp r0,#'L'
-	moveq r7,#PRINTF_LEN_FLOAT_LONG
-
-	ldrb r0,[r1]
-	add r1,r1,#1
-
-12:  @ Type field
-	cmp r0,#0
-	beq 0f  @ Return on null terminator
-
-	cmp r0,#'%'
-	@ Literal %
-	cmp r0,#'d'
-	cmpne r0,#'i'
-	@ signed integer
-	cmp r0,#'u'
-	@ unsigned integer
-	cmp r0,#'f'
-	@ double in fixed-point notation (lowercase)
-	cmp r0,#'F'
-	@ double in fixed point notation (uppercase)
-	cmp r0,#'e'
-	@ double in standard form (lowercase)
-	cmp r0,#'E'
-	@ double in standard form (uppercase)
-	cmp r0,#'g'
-	@ double (infer notation) (lowercase)
-	cmp r0,#'G'
-	@ double (infer notation) (uppercase)
-	cmp r0,#'x'
-	@ hex unsigned int (lowercase)
-	cmp r0,#'X'
-	@ hex unsigned int (uppercase)
-	cmp r0,#'o'
-	@ octal unsigned int
-	cmp r0,#'s'
-	@ string
-	cmp r0,#'c'
-	@ char
-	cmp r0,#'p'
-	@ void *
-	cmp r0,#'a'
-	@ hexfloat (lowercase)
-	cmp r0,#'A'
-	@ hexfloat (uppercase)
-	cmp r0,#'n'
-	@ write # of character printed to int ptr
-
-	@ Print formatted output
+	@ Print the char normally
+	bl _uart1_printf_putc
 	b 1b
 
+2:
+	ldrb r0,[r4],#1  @ read next char
+
+	cmp r0,#0  @ Return on null terminator
+	beq 0f
+	cmp r0,#'d'  @ Signed integer
+	cmpne r0,#'i'	
+	cmp r0,#'u'  @ Unsigned integer
+	cmp r0,#'x'  @ Hex uint (lower)
+	cmp r0,#'X'  @ Hex uint (upper)
+	cmp r0,#'o'  @ Octal uint
+	cmp r0,#'s'  @ String
+	beq _uart1_printf_fmtstr
+
+	cmp r0,#'c'  @ Character
+	cmp r0,#'p'  @ Pointer
+	cmp r0,#'n'  @ Store number of chars printed
+
+	b 1b
 0:
 	pop {r4-r8, lr}
 	pop {r1-r3}
+	bx lr
+
+@ %s
+_uart1_printf_fmtstr:
+	ldr r1,[r5],#4  @ Load address of string and increment ptr to next arg
+
+50:
+	ldrb r0,[r1],#1  @ Load character
+
+	cmp r0,#0
+	beq 1b  @ Stop at null terminator
+	
+	bl _uart1_printf_putc  @ print char then loop
+	b 50b
+
+@ Prints individual character for uart1_printf
+_uart1_printf_putc:
+	push {lr}
+	bl uart1_putc  @ print character
+	add r6,r6,#1  @ increment chars printed counter
+	pop {lr}
 	bx lr
 
