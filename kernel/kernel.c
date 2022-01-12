@@ -30,7 +30,7 @@ uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 
 	init_uart1();
 
-	uart1_printf("Booting %s v%s \r\n", OSNAME, OSVER);
+	uart1_printf("Booting %s v%s\r\n", OSNAME, OSVER);
 
 	handle_kernel_params(r2);
 

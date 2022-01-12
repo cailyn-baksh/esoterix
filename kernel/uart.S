@@ -176,6 +176,8 @@ uart1_printf:
 
 	cmp r0,#0  @ Return on null terminator
 		beq 0f
+	cmp r0,#'%'
+		bleq _uart1_printf_putc
 	cmp r0,#'d'  @ Signed integer
 	cmpne r0,#'i'
 		beq _uart1_printf_fmtdec
@@ -187,6 +189,8 @@ uart1_printf:
 		beq _uart1_printf_fmthexu
 	cmp r0,#'o'  @ Octal uint
 		beq _uart1_printf_fmtoct
+	cmp r0,#'b'  @ Binary uint
+		beq _uart1_printf_fmtbin
 	cmp r0,#'s'  @ String
 		beq _uart1_printf_fmtstr
 	cmp r0,#'c'  @ Character
@@ -278,6 +282,24 @@ _uart1_printf_fmtoct:
 
 51:
 	subs r2,r2,#3  @ decrease shift amount and update flags
+	bpl 50b  @ loop while r2 > 0
+	b 1b
+
+@ %b
+_uart1_printf_fmtbin:
+	ldr r1,[r7],#4  @ Load word and increment ptr
+	mov r2,#31
+
+50:
+	mov r0,r1
+	lsrs r0,r0,r2  @ r0 >>= r2
+	beq 51f  @ dont print anything if this is a leading zero
+	and r0,r0,#1  @ clear high bits
+	orr r0,r0,#0x30  @ convert to ascii
+	bl _uart1_printf_putc
+
+51:
+	subs r2,r2,#1  @ decrease shift amount and update flags
 	bpl 50b  @ loop while r2 > 0
 	b 1b
 

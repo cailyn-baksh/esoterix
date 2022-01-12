@@ -40,9 +40,10 @@ void uart1_printhex(uint32_t val);
  *  d		Signed integer
  *  i
  *  u		Unsigned integer
- *  x		Hexadecimal unsigned integer (lowercase)
- *  X		Hexadecimal unsigned integer (uppercase)
- *  o		Octal unsigned integer
+ *  x		Hexadecimal formatted unsigned integer (lowercase)
+ *  X		Hexadecimal formatted unsigned integer (uppercase)
+ *  o		Octal formatted unsigned integer
+ *  b		Binary formatted unsigned integer
  *  s		Null-terminated string
  *  c		Character
  *  p		Pointer
