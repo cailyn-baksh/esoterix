@@ -22,8 +22,7 @@ _noploop_end:
 
 @ Initializes UART1
 init_uart1:
-	SAVEFRAME
-	push {r4, r5, r6}
+	push {r4-r6, lr}
 
 	@ Get MMIO base address
 	ldr r4,=board  @ r4 = ptr to ptr to HWData struct
@@ -120,16 +119,13 @@ init_uart1:
 	str r6,[r5]
 
 0:
-	pop {r4, r5, r6}
-	RESTOREFRAME
-	bx lr
+	pop {r4-r6, pc}
 
 
 @ writes a character to uart1
 @ takes the character in r0
 uart1_putc:
-	SAVEFRAME
-	push {r4, r5, r6}
+	push {r4-r6, lr}
 
 	@ get MMIO base address
 	ldr r6,=board  @ r6 = ptr to ptr to HWData struct
@@ -150,55 +146,7 @@ uart1_putc:
 	strb r0,[r4]
 
 0:
-	pop {r4, r5, r6}
-	RESTOREFRAME
-	bx lr
-
-@ Writes a null-terminated string to uart1
-@ Takes the address of the string in r0
-uart1_puts:
-	SAVEFRAME
-	push {r4}
-	mov r4,r0  @ put string addr in r4, so we dont have to push and mov each loop
-
-1:
-	ldrb r0,[r4]
-	cmp r0,#0
-	beq 0f  @ return at null terminator
-
-	bl uart1_putc
-
-	add r4,#1
-	b 1b
-
-0:
-	pop {r4}
-	RESTOREFRAME
-	bx lr
-
-@ Prints unsigned hex representation of r0 to uart1
-uart1_printhex:
-	SAVEFRAME
-	mov r1,r0   @ r1 = word to print
-	mov r2,#28  @ r2 = shift amount
-
-1:
-	mov r3,r1
-	lsr r3,r3,r2  @ r3 >>= r2
-	and r3,r3,#0xF  @ Clear high bits
-
-	ldr r0,=hexchars  @ uart1_putc(*(&hexchars+r3))
-	add r0,r0,r3
-	ldrb r0,[r0]
-	bl uart1_putc
-
-	subs r2,r2,#4  @ Decrease shift amount (and update flags)
-	bpl 1b  @ loop if r2 > 0
-
-0:
-	RESTOREFRAME
-	bx lr
-hexchars: .ascii "0123456789abcdef"
+	pop {r4-r6, pc}
 
 @ void uart1_printf(const char *format, ...);
 uart1_printf:

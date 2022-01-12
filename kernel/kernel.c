@@ -30,22 +30,9 @@ uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 
 	init_uart1();
 
-	uart1_puts("Booting " OSNAME " v" OSVER "\r\n");
+	uart1_printf("Booting %s v%s \r\n", OSNAME, OSVER);
 
 	handle_kernel_params(r2);
-
-	const char *name = "cailyn";
-	unsigned int nChars = 0;
-
-	uart1_printf("Hello %s%c\r\n", name, '!');
-	uart1_printf("%x %X%n\r\n", 0xbaddeed, 0xDEADACE, &nChars);
-	uart1_printf("The last line was 0x%X chars long\r\n", nChars);
-	uart1_printf("nChars is at address %p\r\n", &nChars);
-	uart1_printf("8 in octal is %o, and 1 638 221 485 is %o (should be 14151243255)\r\n", 8, 1638221485);
-
-	uart1_printf("%u\r\n", UINT_MAX);
-	uart1_printf("%d\r\n", 14);
-	uart1_printf("%i\r\n", -85654);
 
 	return 0;
 }
