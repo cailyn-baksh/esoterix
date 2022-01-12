@@ -44,6 +44,8 @@ uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 	uart1_printf("8 in octal is %o, and 1 638 221 485 is %o (should be 14151243255)\r\n", 8, 1638221485);
 
 	uart1_printf("%u\r\n", UINT_MAX);
+	uart1_printf("%d\r\n", 14);
+	uart1_printf("%i\r\n", -85654);
 
 	return 0;
 }

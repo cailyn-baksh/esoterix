@@ -229,7 +229,8 @@ uart1_printf:
 	cmp r0,#0  @ Return on null terminator
 		beq 0f
 	cmp r0,#'d'  @ Signed integer
-	cmpne r0,#'i'	
+	cmpne r0,#'i'
+		beq _uart1_printf_fmtdec
 	cmp r0,#'u'  @ Unsigned integer
 		beq _uart1_printf_fmtudec
 	cmp r0,#'x'  @ Hex uint (lower)
@@ -338,15 +339,36 @@ _uart1_printf_fmtsto:
 	str r6,[r0]
 	b 1b
 
+@ %d, %i
+_uart1_printf_fmtdec:
+	@ set carry flag
+	movs r0,#1
+	b 48f
 @ %u
 _uart1_printf_fmtudec:
+	@ clear carry flag
+	movs r0,#0
+48:
 	@ use r3:r2:r1 as a 72-bit register for double dabble
 	ldr r1,[r7],#4  @ Load word and increment ptr
 	mov r2,#0
 	mov r3,#0
 
-	mov r0,#32
+	@ if zero flag is set then check sign
+	beq 49f  @ skip if zero flag clear
+	clz r4,r1
+	cmp r4,#0
+	bne 49f
 
+	mov r0,#'-'
+	bl _uart1_printf_putc
+
+	@ negate
+	mvn r1,r1
+	add r1,r1,#1
+
+49:
+	mov r0,#32
 50:
 	@ check each BCD nybble to see if its >= 5
 	mov r4,#0  @ 2^32 is 10 digits in decimal, so 10 nybbles is the maximum
