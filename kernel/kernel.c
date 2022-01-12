@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <limits.h>
 
 #include "common.h"
 #include "board.h"
@@ -41,6 +42,8 @@ uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 	uart1_printf("The last line was 0x%X chars long\r\n", nChars);
 	uart1_printf("nChars is at address %p\r\n", &nChars);
 	uart1_printf("8 in octal is %o, and 1 638 221 485 is %o (should be 14151243255)\r\n", 8, 1638221485);
+
+	uart1_printf("%u\r\n", UINT_MAX);
 
 	return 0;
 }

@@ -200,35 +200,19 @@ uart1_printhex:
 	bx lr
 hexchars: .ascii "0123456789abcdef"
 
-#define PRINTF_FLAG_LALIGN			0x01  // left align instead of right align
-#define PRINTF_FLAG_SIGN			0x02  // Prepend + for positive numbers and - for negative numbers
-#define PRINTF_FLAG_SIGN2			0x04  // Prepend ' ' for positive and - for negative. Overruled by PRINTF_FLAG_SIGN
-#define PRINTF_FLAG_ZERO			0x08  // Prepend 0 for numeric types with width specified
-#define PRINTF_FLAG_ALT_FORM		0x10  // Alternate form, determined by type field
-
-#define PRINTF_DYNAMIC				0xFFFFFFFF
-
-#define PRINTF_LEN_INT_CHAR			0x01  // For int types, int-sized arg promoted from char
-#define PRINTF_LEN_INT_SHORT		0x02  // For int types, int-sized arg promoted from short
-#define PRINTF_LEN_INT_LONG			0x03  // For int types, long-sized arg. Ignored by float types
-#define PRINTF_LEN_INT_LONG_LONG	0x04  // For int types, long long-sized arg
-#define PRINTF_LEN_INT_SIZE			0x05  // For int types, size_t-sized arg
-#define PRINTF_LEN_INT_MAX			0x06  // For int types, intmax_t-sized arg
-#define PRINTF_LEN_INT_PTRDIFF		0x07  // For int types, ptrdiff_t-sized arg
-#define PRINTF_LEN_FLOAT_LONG		0x08  // For float types, long double-sized arg
-
 @ void uart1_printf(const char *format, ...);
 uart1_printf:
 	push {r1-r3}  @ Push extra arguments onto stack
-	mov r2,sp  @ remember where varargs begin
+	mov r1,sp  @ remember where varargs begin
 	push {r4-r8, lr}  @ Save registers
 
-	mov r4,r0  @ r4 = pointer to format string
-	mov r5,r2  @ r5 = pointer to next arg
-	mov r6,#0  @ r6 = number of chars printed
+	@ r0-r5 are scratch registers  (i couldve kept it to r0-r3 if it weren't for decimal)
+	mov r6,r0  @ r6 = pointer to format string
+	mov r7,r1  @ r7 = pointer to next arg
+	mov r8,#0  @ r8 = number of chars printed
 
 1:
-	ldrb r0,[r4],#1  @ read byte and increment ptr
+	ldrb r0,[r6],#1  @ read byte and increment ptr
 
 	cmp r0,#0  @ Return on null terminator
 		beq 0f
@@ -240,13 +224,14 @@ uart1_printf:
 	b 1b
 
 2:
-	ldrb r0,[r4],#1  @ read next char
+	ldrb r0,[r6],#1  @ read next char
 
 	cmp r0,#0  @ Return on null terminator
 		beq 0f
 	cmp r0,#'d'  @ Signed integer
 	cmpne r0,#'i'	
 	cmp r0,#'u'  @ Unsigned integer
+		beq _uart1_printf_fmtudec
 	cmp r0,#'x'  @ Hex uint (lower)
 		beq _uart1_printf_fmthexl
 	cmp r0,#'X'  @ Hex uint (upper)
@@ -270,7 +255,7 @@ uart1_printf:
 
 @ %s
 _uart1_printf_fmtstr:
-	ldr r1,[r5],#4  @ Load address of string and increment ptr to next arg
+	ldr r1,[r7],#4  @ Load address of string and increment ptr to next arg
 
 50:
 	ldrb r0,[r1],#1  @ Load character
@@ -286,7 +271,7 @@ _uart1_printf_fmtchr:
 	@ NOTE: if uart1_printf starts misbehaving this could be the cause
 	@ NOTE: since i assumed that chars are padded to 4 bytes, but i cant find
 	@ NOTE: it formally stated anywhere (also this seems to work reliably)
-	ldrb r0,[r5],#4  @ Read character then increment ptr
+	ldrb r0,[r7],#4  @ Read character then increment ptr
 	bl _uart1_printf_putc
 	b 1b
 
@@ -300,7 +285,7 @@ _uart1_printf_fmtptr:  @ TODO: make pointers have leading zeroes
 	ldr r3,=_uart1_printf_hexupper
 
 50:
-	ldr r1,[r5],#4  @ Load word and increment ptr
+	ldr r1,[r7],#4  @ Load word and increment ptr
 	mov r2,#28  @ r2 = shift amount
 
 	cmp r1,#0  @ skip loop if 0
@@ -325,7 +310,7 @@ _uart1_printf_fmtptr:  @ TODO: make pointers have leading zeroes
 
 @ %o
 _uart1_printf_fmtoct:
-	ldr r1,[r5],#4  @ Load word and increment ptr
+	ldr r1,[r7],#4  @ Load word and increment ptr
 	mov r2,#30  @ r2 = shift amount (highest octal digit is truncated to 2 bits in an multiple of 8 word)
 
 	cmp r1,#0  @ skip loop if 0
@@ -344,20 +329,108 @@ _uart1_printf_fmtoct:
 
 51:
 	subs r2,r2,#3  @ decrease shift amount and update flags
-	bpl 50b
+	bpl 50b  @ loop while r2 > 0
 	b 1b
 
 @ %n
 _uart1_printf_fmtsto:
-	ldr r0,[r5],#4  @ load addr and increment ptr
+	ldr r0,[r7],#4  @ load addr and increment ptr
 	str r6,[r0]
 	b 1b
+
+@ %u
+_uart1_printf_fmtudec:
+	@ use r3:r2:r1 as a 72-bit register for double dabble
+	ldr r1,[r7],#4  @ Load word and increment ptr
+	mov r2,#0
+	mov r3,#0
+
+	mov r0,#32
+
+50:
+	@ check each BCD nybble to see if its >= 5
+	mov r4,#0  @ 2^32 is 10 digits in decimal, so 10 nybbles is the maximum
+	push {r0}  @ i desperately need another register
+
+51:
+		cmp r4,#8  @ r4 addresses word in r2  (r4 < 8)
+		bge 52f
+			lsl r5,r4,#2  @ r5 = r4 * 4
+
+			lsr r0,r2,r5  @ r0 = r2 >> r5
+			and r0,#0xF  @ clear all bits except for low nybble
+
+			cmp r0,#5  @ if (r5 >= 5) nybble += (3 << r5)
+				movge r0,#3
+				addge r2,r2,r0,lsl r5
+
+			b 53f
+52:		@ else r4 addresses word in r3
+			sub r5,r4,#8  @ r5 = (r4 - 8) * 4
+			lsl r5,r5,#2
+
+			lsr r0,r3,r5
+			and r0,#0xF
+
+			cmp r0,#5  @ if (r5 >= 5) r3 += (3 << r5)
+				movge r0,#3
+				addge r3,r3,r0,lsl r5
+
+53:
+
+		add r4,r4,#1  @ loop while r4 < 10
+		cmp r4,#16
+		blt 51b
+
+	@ r3:r2:r1 << 1
+	lsl r3,r3,#1
+	lsls r2,r2,#1
+	adc r3,r3,#0
+	lsls r1,r1,#1
+	adc r2,r2,#0
+
+	pop {r0}
+	subs r0,r0,#1
+	bne 50b  @ while r0 != 0
+
+	@ print each nybble
+	mov r4,#16
+
+54:
+	cmp r4,#8  @ r4 address word in r2
+	bge 55f
+		lsl r1,r4,#2  @ r1 = r4 * 4
+
+		lsrs r5,r2,r1  @ r5 = r2 >> r1
+		cmpeq r3,#0
+		
+		andne r5,r5,#0xF  @ clear high bits if not leading zero
+		orrne r0,r5,#0x30  @ convert to ascii
+
+		b 56f
+55:	@ else r4 addresses word in r3
+		sub r1,r4,#8
+		lsl r1,r1,#2  @ r1 = (r4 - 8) * 4
+		
+		lsrs r5,r3,r1  @ r5 = r3 >> r1
+
+		andne r5,r5,#0xF  @ clear high bits if not leading zero
+		orrne r0,r5,#0x30  @ convert to ascii
+		
+56:
+	blne _uart1_printf_putc
+
+	@ loop while r4 > 0
+	cmp r4,#0
+	ble 1b
+	sub r4,r4,#1
+	b 54b
 
 @ Prints individual character for uart1_printf
 _uart1_printf_putc:
 	push {lr}
 	bl uart1_putc  @ print character
-	add r6,r6,#1  @ increment chars printed counter
+	add r8,r8,#1  @ increment chars printed counter
 	pop {lr}
 	bx lr
 
