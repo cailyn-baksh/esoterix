@@ -32,7 +32,12 @@ void uart1_printhex(uint32_t val);
  * Simplified printf function for UART1.
  *
  * format strings consist of the following syntax
- *  %type
+ *  %[length]type
+ *
+ * Length field
+ *  Value	Description
+ *  hh		int-sized argument promoted from char
+ *  h		int-sized argument promoted from short
  *
  * Type field
  *  Value	Description

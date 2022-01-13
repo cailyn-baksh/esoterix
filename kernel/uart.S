@@ -152,7 +152,13 @@ uart1_putc:
 uart1_printf:
 	push {r1-r3}  @ Push extra arguments onto stack
 	mov r1,sp  @ remember where varargs begin
-	push {r4-r8, lr}  @ Save registers
+	push {r4-r8, fp, lr}  @ Save registers
+
+	mov fp,sp  @ move frame pointer to start of locals
+	sub sp,sp,#4  @ Move stack pointer to end of locals
+
+	@ Declare locals
+	@ fp + 4 = length
 
 	@ r0-r5 are scratch registers  (i couldve kept it to r0-r3 if it weren't for decimal)
 	mov r6,r0  @ r6 = pointer to format string
@@ -160,6 +166,8 @@ uart1_printf:
 	mov r8,#0  @ r8 = number of chars printed
 
 1:
+	mov r2,#4
+	str r2,[fp,#4]
 	ldrb r0,[r6],#1  @ read byte and increment ptr
 
 	cmp r0,#0  @ Return on null terminator
@@ -171,13 +179,27 @@ uart1_printf:
 	bl _uart1_printf_putc
 	b 1b
 
-2:
+2:  @ handle format specifiers
 	ldrb r0,[r6],#1  @ read next char
 
 	cmp r0,#0  @ Return on null terminator
 		beq 0f
-	cmp r0,#'%'
-		bleq _uart1_printf_putc
+
+	@ Length specifiers
+	cmp r0,#'h'  @ half word
+	bne 3f
+		ldrb r0,[r6],#1  @ read next char
+		cmp r0,#0  @ return on null terminator
+			beq 0f
+
+		cmp r0,#'h'  @ half half word
+			moveq r1,#1
+		@ else only half word
+			movne r1,#2
+		str r1,[fp,#4]
+		beq 2b  @ move to the next characterr		
+
+3:	@ Type specifiers
 	cmp r0,#'d'  @ Signed integer
 	cmpne r0,#'i'
 		beq _uart1_printf_fmtdec
@@ -200,9 +222,13 @@ uart1_printf:
 	cmp r0,#'n'  @ Store number of chars printed
 		beq _uart1_printf_fmtsto
 
+	@ no cases matched; handle char normally and stop processing
+	@ %% case falls through to here
+	bl _uart1_printf_putc
 	b 1b
 0:
-	pop {r4-r8, lr}
+	add sp,sp,#4  @ move stack pointer to beginning of locals
+	pop {r4-r8, fp, lr}
 	pop {r1-r3}
 	bx lr
 
@@ -311,13 +337,13 @@ _uart1_printf_fmtsto:
 
 @ %d, %i
 _uart1_printf_fmtdec:
-	@ set carry flag
-	movs r0,#1
+	@ set zero flag
+	movs r0,#0
 	b 48f
 @ %u
 _uart1_printf_fmtudec:
-	@ clear carry flag
-	movs r0,#0
+	@ clear zero flag
+	movs r0,#1
 48:
 	@ use r3:r2:r1 as a 72-bit register for double dabble
 	ldr r1,[r7],#4  @ Load word and increment ptr
@@ -325,18 +351,25 @@ _uart1_printf_fmtudec:
 	mov r3,#0
 
 	@ if zero flag is set then check sign
-	beq 49f  @ skip if zero flag clear
-	clz r4,r1
-	cmp r4,#0
-	bne 49f
+	bne 49f  @ skip if zero flag clear
 
-	mov r0,#'-'
-	bl _uart1_printf_putc
+	@ if (1 << (length * 8) == 1) 
+	ldr r4,[fp,#4]
+	lsl r4,r4,#3
+	sub r4,r4,#1
+	mov r5,#1
+	lsl r4,r5,r4
+	tst r1,r4
+	beq 49f
+		mov r0,#'-'
+		bl _uart1_printf_putc
 
-	@ negate
-	mvn r1,r1
-	add r1,r1,#1
-
+		@ negate
+		mvn r1,r1
+		add r1,r1,#1
+		
+		sub r4,r4,#1
+		and r1,r1,r4
 49:
 	mov r0,#32
 50:

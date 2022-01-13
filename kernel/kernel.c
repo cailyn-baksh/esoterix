@@ -30,7 +30,12 @@ uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 
 	init_uart1();
 
-	uart1_printf("Booting %s v%s\r\n", OSNAME, OSVER);
+	uart1_printf("Booting %s v%s\r\n", OSNAME, osversion);
+
+	char x = -14;
+	short y = -423;
+	int z = -89684;
+	uart1_printf("%hhd %hd %d\r\n", x, y, z);
 
 	handle_kernel_params(r2);
 
