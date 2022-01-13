@@ -1,7 +1,7 @@
 #!/bin/bash
 # updates build number by one when called
 
-build=54
+build=55
 
 # write to stdout then increment
 printf $build

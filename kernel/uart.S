@@ -166,7 +166,7 @@ uart1_printf:
 	mov r8,#0  @ r8 = number of chars printed
 
 1:
-	mov r2,#4
+	mov r2,#__SIZEOF_INT__
 	str r2,[fp,#4]
 	ldrb r0,[r6],#1  @ read byte and increment ptr
 
@@ -195,7 +195,7 @@ uart1_printf:
 		cmp r0,#'h'  @ half half word
 			moveq r1,#1
 		@ else only half word
-			movne r1,#2
+			movne r1,#__SIZEOF_SHORT__
 		str r1,[fp,#4]
 		beq 2b  @ move to the next characterr		
 
