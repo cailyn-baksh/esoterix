@@ -29,8 +29,20 @@ The objectives of this project are to
 
 To build run `make`. On first build run `sudo make setup` to set up the repo.
 
-To test, run
+To test, run `make test`
 
-```
-qemu-system-arm -M raspi2 -serial stdio -kernel bin/kernel7.img
-```
+## Todo
+
+[x] Kernel debug printf
+[ ] Process kernel arguments
+[ ] CLI over UART0
+[ ] System timer
+[ ] Mailboxes
+[ ] Disk and filesystem
+[ ] initrd
+[ ] Virtual Memory
+[ ] Virtual Machine
+[ ] Cross Assembler
+[ ] Native Assembler
+[ ] Multitasking
+
