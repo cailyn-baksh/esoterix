@@ -1,4 +1,6 @@
 NAME = esoterix
+VERSION := $(shell cat version)
+BUILDNUM = $(shell ./buildnum.sh)
 SRCS = $(filter-out %.swp %.inc %.h,$(wildcard kernel/*))
 OBJS = $(addsuffix .o,$(patsubst %,bin/%,$(SRCS)))
 INCLUDES = include/
@@ -7,8 +9,10 @@ CFLAGS = -march=armv6k -mabi=aapcs -ffreestanding -nostdlib -nostartfiles -O2 -W
 CSTD = c17
 
 build: $(OBJS)
-	$(TOOLCHAIN)-ld -nostdlib -T linker.ld -o bin/$(NAME).elf $^
-	$(TOOLCHAIN)-objcopy bin/$(NAME).elf -O binary bin/kernel.img
+	rm -f bin/$(NAME)-$(VERSION)-*.elf
+	$(TOOLCHAIN)-ld -nostdlib -T linker.ld -o bin/$(NAME)-$(VERSION)-$(BUILDNUM).elf $^
+	$(TOOLCHAIN)-objcopy bin/$(NAME)-$(VERSION)-$(BUILDNUM).elf -O binary bin/kernel.img
+	./buildnum.sh update
 
 bin/kernel/%.c.o: kernel/%.c
 	$(TOOLCHAIN)-gcc $(CFLAGS) -std=$(CSTD) -I kernel -c -o $@ $<
@@ -18,7 +22,7 @@ bin/kernel/version.c.o:: version
 	sleep 0.25
 
 bin/kernel/version.c.o:: kernel/version.c FORCE
-	$(TOOLCHAIN)-gcc $(CFLAGS) -DOSVERSION=$(shell cat version)-$(shell ./buildnum.sh) -I kernel -c -o $@ $<
+	$(TOOLCHAIN)-gcc $(CFLAGS) -DOSVERSION=$(VERSION)-$(BUILDNUM) -I kernel -c -o $@ $<
 
 bin/kernel/%.S.o: kernel/%.S
 	$(TOOLCHAIN)-gcc $(CFLAGS) -I kernel -c -o $@ $<
@@ -31,7 +35,12 @@ setup:
 clean:
 	find bin/* -type f -delete
 
-.PHONY: build setup clean FORCE
+rebuild: clean build
+
+test:
+	qemu-system-arm -M raspi2 -serial null -serial stdio -kernel bin/esoterix-0.0.3-*.elf
+
+.PHONY: build setup clean rebuild test FORCE
 .SILENT: version
 FORCE:
 

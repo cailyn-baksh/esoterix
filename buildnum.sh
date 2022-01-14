@@ -1,14 +1,18 @@
 #!/bin/bash
 # updates build number by one when called
 
-build=2
+build=9
 
 # write to stdout then increment
 if [[ $# == 1 ]]; then
-	build=$1
+	if [[ $1 -eq "update" ]]; then
+		((build++))
+		printf $build
+	else
+		build=$1
+	fi
 else
 	printf $build
-	((build++))
 fi
 
 cp $0 $0.tmp
