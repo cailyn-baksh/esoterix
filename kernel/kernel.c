@@ -30,7 +30,10 @@ uint32_t kernel_main(uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3) {
 
 	init_uart1();
 
+	//panic(5);
+
 	uart1_printf("Booting %s v%s\r\n", OSNAME, osversion);
+	uart1_printf("%s", (((char *)0x13001)));
 
 	handle_kernel_params(r2);
 

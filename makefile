@@ -37,10 +37,9 @@ clean:
 
 rebuild: clean build
 
-test:
+qemu-rpi2:
 	qemu-system-arm -M raspi2 -serial null -serial stdio -kernel bin/esoterix-0.0.3-*.elf
 
 .PHONY: build setup clean rebuild test FORCE
-.SILENT: version
 FORCE:
 

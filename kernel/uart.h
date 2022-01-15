@@ -23,10 +23,8 @@
 
 #include <stdint.h>
 
-void init_uart1(void);
+void *init_uart1(void);
 void uart1_putc(char);
-void uart1_puts(char *);
-void uart1_printhex(uint32_t val);
 
 /*
  * Simplified printf function for UART1.

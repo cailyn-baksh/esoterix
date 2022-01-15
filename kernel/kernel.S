@@ -8,7 +8,7 @@
 .section ".rodata"
 
 CRLF: .byte 0xD,0xA,0x0
-kPanicStr: .asciz "Kernel panic. Code %X%s"
+kPanicStr: .asciz "Kernel panic. Code %p%s"
 
 @@@@@    .data    @@@@@
 .section ".data"
@@ -66,7 +66,7 @@ panic:
 	mov r10,r0  @ Move r0 into r10 in case printing fails
 
 	ldr r0,=kPanicStr
-	mov r1,r10
+	ldr r1,=board
 	ldr r2,=CRLF
 	bl uart1_printf
 

@@ -25,9 +25,9 @@ init_uart1:
 	push {r4-r6, lr}
 
 	@ Get MMIO base address
-	ldr r4,=board  @ r4 = ptr to ptr to HWData struct
-	ldr r4,[r4]  @ r4 = ptr to HWData struct
-	ldr r4,[r4, #HWData_mmio_base_offset]	
+	ldr r4,=board  @  typeof r4 = HWData **
+	ldr r4,[r4]  @ typeof r4 = HWData *
+	ldr r4,[r4, #HWData_mmio_base_offset]  @ r4 = board->mmio_base
 
 	@ AUX_ENABLE register |= 1
 	ldr r5,=AUX_ENABLE_OFFSET
@@ -119,6 +119,7 @@ init_uart1:
 	str r6,[r5]
 
 0:
+	ldr r0,=board
 	pop {r4-r6, pc}
 
 
