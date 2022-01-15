@@ -33,16 +33,16 @@ To test, run `make test`
 
 ## Todo
 
-[x] Kernel debug printf
-[ ] Process kernel arguments
-[ ] CLI over UART0
-[ ] System timer
-[ ] Mailboxes
-[ ] Disk and filesystem
-[ ] initrd
-[ ] Virtual Memory
-[ ] Virtual Machine
-[ ] Cross Assembler
-[ ] Native Assembler
-[ ] Multitasking
+ - [x] Kernel debug printf
+ - [ ] Process kernel arguments
+ - [ ] CLI over UART0
+ - [ ] System timer
+ - [ ] Mailboxes
+ - [ ] Disk and filesystem
+ - [ ] initrd
+ - [ ] Virtual Memory
+ - [ ] Virtual Machine
+ - [ ] Cross Assembler
+ - [ ] Native Assembler
+ - [ ] Multitasking
 
