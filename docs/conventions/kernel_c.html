@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>C Conventions | Esoterix</title>
+
+		<link rel="stylesheet" type="text/css" href="/docs.css" />
+
+		<script src="/toc.js"></script>
+	</head>
+	<body>
+		<div id="toc" class="toc-no-heading"></div>
+		<main>
+			<h1 class="toc-exclude">C Conventions</h1>
+
+			<h2>Header files</h2>
+			<p>
+				C-standard header files should be included before kernel
+				headers are included. Keep in mind that only a limited subset
+				of standard headers are available since there is no standard
+				library provided.
+			</p>
+			<p>
+				Standard headers should also only be included using angle
+				brackets, and kernel headers should only be included using
+				double quotes.
+			</p>
+<pre>
+#include &lt;stdint.h&gt;
+
+#include "some_header.h"
+</pre>
+			<p>
+				Header files will be written to be 100% compatible with both
+				C and assembly. Header files which include code only compatible
+				with one or the other should define that code in a language
+				specific section. Language specific sections are always defined
+				the same way, by checking if the macro
+				<code>__ASSEMBLER__</code> is defined. Even if there is no
+				assembly-specific code in the header file it should still use
+				<code>ifdef</code> to prevent confusion in other headers.
+			</p>
+<pre>
+#ifdef __ASSEMBLER__
+/* asm-specific */
+#else
+/* C-specific */
+#endif  // __ASSEMBLER__
+</pre>
+
+			<p>
+				Headers which declare variables, constants, or functions as
+				<code>extern</code> should only include those declarations if
+				the macro <code>NOEXTERN</code> is not defined.
+			</p>
+<pre>
+#ifndef NOEXTERN
+/* extern declarations go here */
+#endif  // NOEXTERN
+</pre>
+			<p>
+				Source files which define symbols declared as extern in the
+				header files can then define <code>NOEXTERN</code> before
+				including the header files. <code>NOEXTERN</code> should be
+				undefined after the header files are included, and includes
+				marked as <code>NOEXTERN</code> should come after regular
+				includes.
+			</p>
+<pre>
+#include &lt;stdint.h&gt;
+
+#include "some_header.h"
+#include "another_header.h"
+
+#define NOEXTERN
+#include "header_with_externs.h"
+#undef NOEXTERN
+</pre>
+		</main>
+	</body>
+</html>

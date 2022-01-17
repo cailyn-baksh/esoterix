@@ -52,6 +52,16 @@ code.subheading {
 	margin-bottom: 1.8em;
 }
 
+pre {
+	padding: 4px;
+	border-radius: 3px;
+
+	background-color: #ccc;
+	font-size: large;
+	
+	max-width: 99%;
+}
+
 /* Tables */
 table {
 	border-collapse: collapse;
