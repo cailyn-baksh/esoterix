@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Esoterix Docs</title>
+
+		<link rel="stylesheet" type="text/css" href="docs.css" />
+		<link rel="stylesheet" type="text/css" href="topics.css" />
+
+		<script src="toc.js"></script>
+	</head>
+	<body>
+		<div id="toc" class="toc-no-heading"></div>
+		<main>
+			<h1>About Esoterix</h1>
+			<p>
+				Esoterix is a 32-bit OS for the Raspberry Pi which only runs
+				esoteric programming languages.
+			</p>
+			<p>
+				This site contains documentation for both development and use
+				of this operating system.
+			</p>
+
+			<h1>Topics</h1>
+
+			<h2>Kernel</h2>
+			<div class="topics">
+				<a class="topic" href="kernel/panic.html" target="_blank">
+					<h3 class="toc-exclude">Kernel Panic</h3>
+					<p>
+						A kernel panic occurs when a fatal error occurs which the
+						kernel is unable to recover from.
+					</p>
+				</a>
+
+				<a class="topic" href="kernel/vm.html" target="_blank">
+					<h3 class="toc-exclude">Virtual Machine</h3>
+					<p>
+						To achieve the goal of only executing esoteric languages, Esoterix runs all executables
+						in an esoteric virtual machine.
+					</p>
+				</a>
+			</div>
+
+			<h2>Userland</h2>
+			<div class="topics">
+				<a class="topic" href="userland/asm.html" target="_blank">
+					<h3 class="toc-exclude">Assembly Language</h3>
+					<p>
+						The Esoterix virtual machine is designed to allow for a wide range of programs to
+						be written for it in esoteric languages, as well as to allow for system utilities,
+						processes, and drivers to be developed on it. Since most esoteric languages are not
+						designed with device drivers and the like in mind, it is necessary to use an assembly
+						language to harness every feature of the virtual machine. This document details the
+						instructions in that language.
+					</p>
+				</a>
+			</div>
+
+			<h2>Development & Coding Standards</h2>
+			<div class="topics">
+				<a class="topic" href="/conventions/kernel_asm.html" target="_blank">
+					<h3 class="toc-exclude">Kernel Assembly Conventions</h3>
+					<p>
+						Conventions for writing assembly code in the kernel.
+					</p>
+				</a>
+				<a class="topic" href="/conventions/kernel_c.html" target="_blank">
+					<h3 class="toc-exclude">Kernel C Conventions</h3>
+					<p>
+						Conventions for writing C code in the kernel.
+					</p>
+				</a>
+			</div>
+		</main>
+	</body>
+</html>

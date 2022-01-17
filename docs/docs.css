@@ -1,0 +1,108 @@
+body {
+	margin: 0;
+	padding: 0;
+
+	font-family: sans-serif;
+	overflow: hidden;
+
+	display: grid;
+	grid-template-columns: 20rem 1fr;
+	column-gap: 20px;
+}
+
+main {
+	grid-column: 2;
+
+	overflow-y: scroll;
+
+	height: 100vh;
+}
+
+/* inline styles */
+
+a {
+	color: #007fdd;
+	text-decoration-color: #007fdd00;
+}
+
+a:visited {
+	color: #8f00dd;
+}
+
+a:hover {
+	text-decoration-color: #007fddff;
+}
+
+a:visited:hover {
+	text-decoration-color: #8f00ddff;
+}
+
+code {
+	padding: 1px 2px;
+	border-radius: 3px;
+
+	background-color: #ccc;
+	font-size: large;
+}
+
+code.subheading {
+	display: block;
+	max-width: 99%;
+	font-size: x-large;
+	margin-bottom: 1.8em;
+}
+
+pre {
+	padding: 4px;
+	border-radius: 3px;
+
+	background-color: #ccc;
+	font-size: large;
+	
+	max-width: 99%;
+}
+
+/* Tables */
+table {
+	border-collapse: collapse;
+}
+
+table th, table td {
+	border: 1px solid black;
+	padding: 2px 4px;
+	text-align: left;
+}
+
+table.center th, table.center td {
+	text-align: center;
+}
+
+/* Table of contents */
+#toc {
+	padding: 5px;
+
+	position: relative;
+	grid-column: 1;
+	overflow-y: scroll;
+}
+
+#toc ol {
+	counter-reset: subsections;
+}
+
+#toc li {
+	counter-increment: subsections;
+}
+
+#toc li::marker {
+	content: counters(subsections, ".") ". ";
+}
+
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: no-preference) {
+	a {
+		transition: text-decoration-color 75ms linear;
+	}
+}

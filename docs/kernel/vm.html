@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>VM | Esoterix</title>
+		<link rel="stylesheet" type="text/css" href="/docs.css" />
+		<script src="/toc.js"></script>
+	</head>
+	<body>
+		<div id="toc"></div>
+		<main>
+			<h1 class="toc-exclude">Virtual Machine</h1>
+			<p>
+				To achieve the goal of only executing esoteric languages, Esoterix runs all executables
+				in an esoteric virtual machine.
+			</p>
+
+			<h2>Registers</h2>
+			<p>
+				The virtual machine has 4 registers: <code>pc</code>, <code>cp</code>,
+				<code>dr</code>, and <code>ar</code>.
+			</p>
+			<p>
+				<code>pc</code> is the program counter. It contains the address
+				of the next instruction to execute. This register can only be
+				modified indirectly through the branch instruction.
+			</p>
+			<p>
+				<code>cp</code> is the cell pointer. It is an unsigned 32-bit
+				value which contains the offset of the currently selected cell.
+			</p>
+			<p>
+				<code>dr</code> is the data register.
+			</p>
+			<p>
+				<code>ar</code> is the address register. It is 32-bits long and
+				is used for long jumps or jumps to fixed memory addresses.
+			</p>
+
+			<h2>Flags</h2>
+			<p>
+				Flags is a set of 4 bits which contains the following bit flags which are used by various instructions:
+			</p>
+			<table>
+				<tr>
+					<th>Bit</th>
+					<th>Flag</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td><code>0</code></td>
+					<td>Z</td>
+					<td>Zero flag</td>
+				</tr>
+				<tr>
+					<td><code>1</code></td>
+					<td>N</td>
+					<td>Negative flag</td>
+				</tr>
+				<tr>
+					<td><code>2</code></td>
+					<td>C</td>
+					<td>Carry flag</td>
+				</tr>
+				<tr>
+					<td><code>3</code></td>
+					<td>V</td>
+					<td>Overflow flag</td>
+				</tr>
+			</table>
+
+			<h2>Memory</h2>
+			<p>
+				Memory is organized into a finite series of 1 byte cells. The lowest address is 0.
+				<code>cp</code> is initialized to 0 when a program starts.
+			</p>
+
+			<h2>Instructions</h2>
+			<p>
+				Every instruction begins with a 4-bit condition Nybble, followed by a 4-bit opcode
+			</p>
+
+			<h3>Condition Nybble</h3>
+			<p>
+				The condition nybble makes up the first 4 bits of every
+				instruction, and allows for instructions to be conditionally
+				executed. Only instructions whose condition evaluates to
+				<code>1</code> will be executed.
+			</p>
+			<p>
+				The negate bit is the high bit of the condition nybble, and is
+				applied after the condition code is evaluated. <b>Conditions
+				are negated if the negate bit is <code>0</code> rather than
+				<code>1</code></b>. This is so that null bytes' condition codes
+				evaluate to <code>&not;(always execute)</code>.
+			</p>
+
+			<table>
+				<caption>Condition Nybble</caption>
+				<tr>
+					<th>Bit</th>
+					<td>3</td>
+					<td>2</td>
+					<td>1</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<th>Meaning</th>
+					<td>Negate</td>
+					<td colspan="3">Condition code</td>
+				</tr>
+			</table>
+
+			<br>
+
+			<table>
+				<caption>Condition Code</caption>
+				<tr>
+					<th>Code</th>
+					<th>Test</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td><code>000</code></td>
+					<td>-</td>
+					<td>Always execute</td>
+				</tr>
+				<tr>
+					<td><code>001</code></td>
+					<td>Z</td>
+					<td>Execute if zero flag is set</td>
+				</tr>
+				<tr>
+					<td><code>010</code></td>
+					<td>C</td>
+					<td>Execute if carry flag is set</td>
+				</tr>
+				<tr>
+					<td><code>011</code></td>
+					<td>N</td>
+					<td>Execute if negative flag is set</td>
+				</tr>
+				<tr>
+					<td><code>100</code></td>
+					<td>V</td>
+					<td>Execute if overflow flag is set</td>
+				</tr>
+				<tr>
+					<td><code>101</code></td>
+					<td>N == V</td>
+					<td>Execute if negative flag equals overflow flag</td>
+				</tr>
+				<tr>
+					<td><code>110</code></td>
+					<td>-</td>
+					<td>Reserved</td>
+				</tr>
+				<tr>
+					<td><code>111</code></td>
+					<td>-</td>
+					<td>Reserved</td>
+				</tr>
+			</table>
+
+			<h3>Opcode</h3>
+			<table>
+				<caption>Opcodes</caption>
+				<tr>
+					<th>Opcode</th>
+					<th>Length (b)</th>
+					<th>Description</th>
+				</tr>
+				<tr>
+					<td><code>0h</code></td>
+					<td>8</td>
+					<td>Load cell to <code>dr</code></td>
+				</tr>
+				<tr>
+					<td><code>1h</code></td>
+					<td>24</td>
+					<td>Load immediate to <code>dr</code></td>
+				</tr>
+				<tr>
+					<td><code>2h</code></td>
+					<td>8</td>
+					<td>Store <code>dr</code> to cell</td>
+				</tr>
+				<tr>
+					<td><code>3h</code></td>
+					<td>16</td>
+					<td>Manipulate flags</td>
+				</tr>
+				<tr>
+					<td><code>4h</code></td>
+					<td>24</td>
+					<td>Branch</td>
+				</tr>
+				<tr>
+					<td><code>5h</code></td>
+					<td>40</td>
+					<td>Jump</td>
+				</tr>
+				<tr>
+					<td><code>6h</code></td>
+					<td>32</td>
+					<td>Subtract</td>
+				</tr>
+				<tr>
+					<td><code>7h</code></td>
+					<td>32</td>
+					<td>Bitwise</td>
+				</tr>
+			</table>
+
+			<h4>Manipulate Flags</h4>
+			<p>
+				The manipulate flags instruction sets or clears flags. The low
+				two bits are the flag bit to target. The 2nd bit is whether to
+				set (1) or clear (0) the flag. The high bits are reserved.
+			</p>
+
+			<table>
+				<caption>Manipulate Flags Params</caption>
+				<tr>
+					<th>Bit</th>
+					<td>7</td>
+					<td>6</td>
+					<td>5</td>
+					<td>4</td>
+					<td>3</td>
+					<td>2</td>
+					<td>1</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<th>Meaning</th>
+					<td colspan="5">Reserved</td>
+					<td>Set</td>
+					<td colspan="2">Flag</td>
+				</tr>
+			</table>
+
+			<h4>Branch</h4>
+			<p>
+				The branch instruction branches to a <code>pc</code>-relative
+				offset. The instruction takes a 16-bit signed integer which is
+				added to <code>pc</code>.
+			</p>
+
+			<h4>Jump</h4>
+			<p>
+				The jump instruction sets <code>pc</code> to the following
+				32-bit address. 
+			</p>
+
+			<h4>Subtract</h4>
+			<p>
+				The subtract instruction expects a control byte followed by
+				signed 16-bit immediate value.
+			</p>
+
+			<table>
+				<caption>Subtract control byte</caption>
+				<tr>
+					<th>Bit</th>
+					<td>7</td>
+					<td>6</td>
+					<td>5</td>
+					<td>4</td>
+					<td>3</td>
+					<td>2</td>
+					<td>1</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<th>Meaning</th>
+					<td>Discard</td>
+					<td colspan="3">Reserved</td>
+					<td colspan="2">Dest</td>
+					<td colspan="2">Source</td>
+				</tr>
+			</table>
+
+			<p>
+				If the discard bit is set, flags are updated but the result of
+				the subtraction is not stored.
+			</p>
+			<p>
+				The destination bits determine both the first operand and the
+				destination of the result (if applicable).
+			</p>
+			<p>
+				The source bits determine the second operand. The following
+				pseudocode describes the function of the instruction
+			</p>
+
+			<pre>
+if discard
+	dest - source
+else
+	dest = dest - source
+			</pre>
+
+			<table>
+				<caption>Destinations</caption>
+				<tr>
+					<th>Dest value</th>
+					<th>Destination</th>
+				</tr>
+				<tr>
+					<td><code>00</code></td>
+					<td><code>dr</code></td>
+				</tr>
+				<tr>
+					<td><code>01</code></td>
+					<td><code>[cp]</code></td>
+				</tr>
+				<tr>
+					<td><code>10</code></td>
+					<td><code>cp</code></td>
+				</tr>
+			</table>
+
+			<br>
+
+			<table>
+				<caption>Sources</caption>
+				<tr>
+					<th>Src value</th>
+					<th>Source</th>
+				</tr>
+				<tr>
+					<td><code>00</code></td>
+					<td><code>dr</code></td>
+				</tr>
+				<tr>
+					<td><code>01</code></td>
+					<td><code>[cp]</code></td>
+				</tr>
+				<tr>
+					<td><code>10</code></td>
+					<td>Immediate value</td>
+				</tr>
+			</table>
+
+			<h4>Bitwise</h4>
+			<p>
+				There are four bitwise operations provided: nand, arithmetic left shift, arithmetic
+				right shift, and logical right shift. These are all performed by the same opcode.
+				The instruction takes a control byte which selects the operation.
+			</p>
+
+			<table>
+				<caption>Bitwise Control Byte</caption>
+				<tr>
+					<th>Bit</th>
+					<td>7</td>
+					<td>6</td>
+					<td>5</td>
+					<td>4</td>
+					<td>3</td>
+					<td>2</td>
+					<td>1</td>
+					<td>0</td>
+				</tr>
+				<tr>
+					<th>Meaning</th>
+					<td>Discard</td>
+					<td colspan="3">Reserved</td>
+					<td>Dest</td>
+					<td>Source</td>
+					<td colspan="2">Operation</td>
+				</tr>
+			</table>
+
+			<p>
+				If the discard bit is set, flags are updated but the result of
+				the operation is not stored.
+			</p>
+			<p>
+				The Dest bit selects whether the left hand operand and destination of the operation
+				is the current cell (<code>0</code>) or <code>dr</code> (<code>1</code>).
+			</p>
+			<p>
+				The source bit selects whether the right hand operand is an immediate byte
+				(<code>0</code>) or <code>dr</code> (<code>1</code>).
+			</p>
+			<p>
+				The operation bits select which bitwise operation to perform, according to the
+				bitwise operation codes table.
+			</p>
+
+			<table>
+				<caption>Bitwise operation codes</caption>
+				<tr>
+					<th>Code</th>
+					<th>Operation</th>
+				</tr>
+				<tr>
+					<td><code>00</code></td>
+					<td>NAND</td>
+				</tr>
+				<tr>
+					<td><code>01</code></td>
+					<td>Left shift</td>
+				</tr>
+				<tr>
+					<td><code>10</code></td>
+					<td>Arithmetic right shift</td>
+				</tr>
+				<tr>
+					<td><code>11</code></td>
+					<td>Logical right shift</td>
+				</tr>
+			</table>
+
+			<h4>Load cell to data register</h4>
+			<p>
+				Copies the value of the current cell into <code>dr</code>.
+			</p>
+
+			<h4>Load immediate to data register</h4>
+			<p>
+				Copies an immediate 16-bit value into <code>dr</code>
+			</p>
+
+			<h4>Store data register to cell</h4>
+			<p>
+				Copy the value in <code>dr</code> into the current cell.
+			</p>
+		</main>
+	</body>
+</html>

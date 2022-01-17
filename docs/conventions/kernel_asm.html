@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Assembly Conventions | Esoterix</title>
+
+		<link rel="stylesheet" type="text/css" href="/docs.css" />
+
+		<script src="/toc.js"></script>
+	</head>
+	<body>
+		<div id="toc" class="toc-no-heading"></div>
+		<main>
+			<h1 class="toc-exclude">Assembly Conventions</h1>
+			<p>
+				Conventions that assembly code in the kernel follows. Knowing
+				these will make reading kernel assembly a lot easier.
+			</p>
+
+			<h2>AAPCS Register Saving</h2>
+			<p>
+				AAPCS (or at least as much of it as i understand) specifies
+				that
+			</p>
+			<ul>
+				<li>
+					Registers <code>r0-r1</code> are the result registers
+					(where the return value goes).
+				</li>
+				<li>
+					Registers <code>r0-r3</code> are argument registers
+					(where the first function arguments go)
+				</li>
+				<li>
+					Registers <code>r4-r11</code> are callee-saved registers
+					(the function being called needs to save the values of
+					these registers before using them, and the caller can
+					assume that the values in these registers will not change
+					after a function has been called)
+				</li>
+			</ul>
+			<p>
+				It is important to follow these rules so that assembly and C
+				code can interact with one another.
+			</p>
+
+			<h2>Stack Frames</h2>
+			<!-- TODO: write alt text for this image (i have no clue how to do that) -->
+			<img src="/img/stack_frame.webp" width="30%" />
+			<p>
+				The above image visualizes how stack frames work. The ARM ABI
+				specifies that r4-r11 are callee-saved registers, however you
+				only need to save the ones which you use. Saving fewer
+				registers can result in smaller stack frames and thus less
+				memory usage.
+			</p>
+			<p>
+				After stack frame initialization, <code>sp</code> should point
+				to the beginning of the function stack, and <code>fp</code>
+				should point to the beginning of function locals.
+			</p>
+			<p>
+				Initializing a stack frame might look something like this.
+				If the function takes arguments on the stack (i.e. has
+				more than 4 parameters) then you should store the initial
+				value of <code>sp</code> before initializing the stack frame.
+			</p>
+<pre>
+push {r3}
+mov r3,sp
+push {&lt;general registers&gt;, fp, lr}
+mov fp,sp
+add sp,sp,&lt;size of locals&gt;
+</pre>
+			<p>
+				Depending on the number of fixed arguments, a variadic function
+				in assembly might want to push the unused argument registers
+				onto the stack before initializing the stack frame.
+			</p>
+<pre>
+push {&lt;unused argument registers&gt;}
+mov r0,sp
+push {&lt;general registers&gt;, fp, lr}
+mov fp,sp
+add sp,sp,&lt;size of locals&gt;
+</pre>
+			<p>
+				Cleaning up a stack frame might look like this.
+			</p>
+<pre>
+sub sp,sp,&lt;size of locals&gt;
+pop {&lt;general registers&gt;, fp, lr}
+</pre>
+			<p>
+				In cases where you return immediately after cleaning up the
+				stack frame, you can replace <code>lr</code> with
+				<code>pc</code> in the <code>pop</code> instruction.
+			</p>
+<pre>
+sub sp,sp,&lt;size of locals&gt;
+pop {&lt;general registers&gt;, fp, pc}
+</pre>
+
+			<h2>Return</h2>
+			<p>
+				All functions written in assembly should put all appropriate
+				cleanup code at the end of the function, with the numeric label
+				<code>0</code>. The label <code>0</code> should never be used
+				anywhere else. This means that returning can be done by
+				branching to <code>0f</code>. Branching to <code>0b</code> is
+				never valid.
+			</p>
+			<p>
+				Cleanup code after label <code>0</code> is not allowed to
+				modify <code>r0</code> or <code>r1</code>, so a return code may
+				be set by setting these two values.
+			</p>
+
+			<h2>Comments</h2>
+			<p>
+				Comments in assembly source files (.S) are made using
+				<code>@</code>. Comments in C header files should be C-style
+				multiline or C++ style single line comments, even in the
+				assembly-specific parts of the header files and even next to
+				assembly code embedded in header files.
+			</p>
+		</main>
+	</body>
+</html>

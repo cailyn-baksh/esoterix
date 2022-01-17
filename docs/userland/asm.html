@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Assembly | Esoterix</title>
+		<link rel="stylesheet" type="text/css" href="/docs.css" />
+		<script src="/toc.js"></script>
+	</head>
+	<body>
+		<div id="toc"></div>
+		<main>
+			<h1 class="toc-exclude">Assembly</h1>
+			<p>
+				The Esoterix virtual machine is designed to allow for a wide range of programs to
+				be written for it in esoteric languages, as well as to allow for system utilities,
+				processes, and drivers to be developed on it. Since most esoteric languages are not
+				designed with device drivers and the like in mind, it is necessary to use an assembly
+				language to harness every feature of the virtual machine. This document details the
+				instructions in that language.
+			</p>
+
+			<h2>Syntax</h2>
+			<p>
+				Each line may contain 1 instruction. Comments are denoted by a semicolon
+				(<code>;</code>), and may be placed at the end of a line or on a line of their own.
+			</p>
+			<p>
+				Labels are named locations in the code. They do not translate to any instructions
+				when assembled. Labels are used to represent addresses which are determined during
+				assembly. Labels can be any string of valid ASCII characters, terminated by a
+				colon (<code>:</code>). The valid characters for a label are:
+			</p>
+			<ul>
+				<li>Any upper or lower case letter</li>
+				<li>Any digit character (cannot be the first character of a label)</li>
+				<li>Any of the following miscellaneous characters: <code>_@.</code></li>
+			</ul>
+			<p>Label names cannot conflict with any register names or instruction mnemonics.</p>
+			<p>
+				Two registers are provided: <code>cp</code> and <code>r</code>. <code>cp</code> is
+				the pointer to the current cell. <code>r</code> is a general purpose register.
+				<code>cp</code> can be dereferenced using square brackets: <code>[cp]</code>.
+			</p>
+			<p>
+				Immediate values begin with a <code>#</code> and can be in base 16, 10, 8, or 2.
+				Immediate values are parsed from the <code>#</code> until a comma, semicolon,
+				whitespace character, or EOL is reached. The base is then determined by the last
+				character. <code>h</code> is hex, <code>o</code> is octal, <code>b</code> is
+				binary, and no suffix is decimal. An error will be raised by the assembler if a
+				string of digits has a suffix that contradicts the digits in the number.
+			</p>
+
+			<h2>Condition codes</h2>
+			<p>
+				Every instruction can have an optional condition code added to
+				the end of it. This allows instructions to be executed only if
+				the condition is true.
+			</p>
+
+			<table>
+				<caption>Condition Code Suffixes</caption>
+				<tr>
+					<th>Suffix</th>
+					<th>Semantic Meaning</th>
+					<th>Effect</th>
+				</tr>
+				<tr>
+					<td><code>z</code></td>
+					<td>Execute if zero</td>
+					<td rowspan="2">Execute if zero flag is set</td>
+				</tr>
+				<tr>
+					<td><code>eq</code></td>
+					<td>Execute if equal</td>
+				</tr>
+
+				<tr>
+					<td><code>nz</code></td>
+					<td>Execute if non-zero</td>
+					<td rowspan="2">Execute if zero flag is not set</td>
+				</tr>
+				<tr>
+					<td><code>ne</code></td>
+					<td>Execute if not equal</td>
+				</tr>
+
+				<tr>
+					<td><code>c</code></td>
+					<td>Execute if carry</td>
+					<td rowspan="2">Execute if carry flag is set</td>
+				</tr>
+				<tr>
+					<td><code>hs</code></td>
+					<td>Execute if unsigned higher or same</td>
+				</tr>
+
+				<tr>
+					<td><code>nc</code></td>
+					<td>Execute if no carry</td>
+					<td rowspan="2">Execute if carry flag is not set</td>
+				</tr>
+				<tr>
+					<td><code>lo</code></td>
+					<td>Execute if unsigned lower</td>
+				</tr>
+
+				<tr>
+					<td><code>n</code></td>
+					<td>Execute if negative</td>
+					<td>Execute if negative flag is set</td>
+				</tr>
+
+				<tr>
+					<td><code>p</code></td>
+					<td>Execute if positive</td>
+					<td>Execute if negative flag is not set</td>
+				</tr>
+
+				<tr>
+					<td><code>o</code></td>
+					<td>Execute if overflow</td>
+					<td>Execute if overflow flag is set</td>
+				</tr>
+
+				<tr>
+					<td><code>no</code></td>
+					<td>Execute if no overflow</td>
+					<td>Execute if overflow flag is not set</td>
+				</tr>
+
+				<tr>
+					<td><code>ge</code></td>
+					<td>Execute if signed greater than or equal</td>
+					<td>Execute if negative flag equals overflow flag</td>
+				</tr>
+
+				<tr>
+					<td><code>lt</code></td>
+					<td>Execute if signed less than</td>
+					<td>Execute if negative flag does not equal overflow flag</td>
+				</tr>
+			</table>
+
+			<h2>Instructions</h2>
+
+			<table class="center">
+				<caption>Instruction Listing</caption>
+				<tr>
+					<td><code>nop</code></td>
+					<td><code>b <i>addr</i></code></td>
+					<td><code>bz <i>addr</i></code></td>
+					<td><code>beq <i>addr</i></code></td>
+					<td><code>bnz <i>addr</i></code></td>
+					<td><code>bne <i>addr</i></code></td>
+					<td><code>bc <i>addr</i></code></td>
+					<td><code>bhs <i>addr</i></code></td>
+				</tr>
+				<tr>
+					<td><code>bnc <i>addr</i></code></td>
+					<td><code>blo <i>addr</i></code></td>
+					<td><code>bn <i>addr</i></code></td>
+					<td><code>bp <i>addr</i></code></td>
+					<td><code>bo <i>addr</i></code></td>
+					<td><code>bno <i>addr</i></code></td>
+					<td><code>bge <i>addr</i></code></td>
+					<td><code>blt <i>addr</i></code></td>
+				</tr>
+				<tr>
+					<td><code>stz</code></td>
+					<td><code>clz</code></td>
+					<td><code>stn</code></td>
+					<td><code>cln</code></td>
+					<td><code>stc</code></td>
+					<td><code>clc</code></td>
+					<td><code>sto</code></td>
+					<td><code>clo</code></td>
+				</tr>
+				<tr>
+					<td><code>add cp,<i>imm8</i></code></td>
+					<td><code>add [cp],<i>imm8</i></code></td>
+					<td><code>add [cp],r</code></td>
+					<td><code>nand [sp],<i>imm8</i></code></td>
+					<td><code>nand [sp],r</code></td>
+					<td><code>nand r,<i>imm8</i></code></td>
+					<td><code>nand r,r</code></td>
+					<td><code>lsl [sp],<i>imm8</i></code></td>
+				</tr>
+				<tr>
+					<td><code>lsl [sp],r</code></td>
+					<td><code>lsl r,<i>imm8</i></code></td>
+					<td><code>lsl r,r</code></td>
+					<td><code>lsr [sp],<i>imm8</i></code></td>
+					<td><code>lsr [sp],r</code></td>
+					<td><code>lsr r,<i>imm8</i></code></td>
+					<td><code>lsr r,r</code></td>
+					<td><code>asr [sp],<i>imm8</i></code></td>
+				</tr>
+				<tr>
+					<td><code>asr [sp],r</code></td>
+					<td><code>asr r,<i>imm8</i></code></td>
+					<td><code>asr r,r</code></td>
+					<td><code>ldc</code></td>
+					<td><code>ld <i>imm8</i></code></td>
+					<td><code>str</code></td>
+				</tr>
+			</table>
+
+			<h3><code>nop</code></h3>
+			<p>
+				Does nothing. This pseudo-instruction can assemble to any
+				instruction, but will always have a condition code of
+				<code>0h</code>. Usually assemblers will pick the shortest
+				possible instruction, however they can choose longer ones for
+				padding.
+			</p>
+
+			<h3>Branch</h3>
+			<code class="subheading">b <i>label</i></code>
+			<p>
+				<code>b</code>, the branch instruction, branches to a label
+				using a pc-relative offset.
+			</p>
+
+			<h3>Jump</h3>
+			<code class="subheading">j <i>addr</i></code>
+			<p>
+				<code>j</code>, the jump instruction, jumps to a label or
+				address by setting the value of <code>pc</code>.
+			</p>
+
+			<h3>Flag manipulation instructions</h3>
+			<code class="subheading">
+				stz<br>
+				stn<br>
+				stc<br>
+				sto<br>
+				clz<br>
+				cln<br>
+				clc<br>
+				clo
+			</code>
+
+			<p>
+				The flag manipulation instructions are used to set or clear flags.
+			</p>
+
+			<table>
+				<tr>
+					<th>Instruction</th>
+					<th>Effect</th>
+				</tr>
+				<tr>
+					<td><code>stz</code></td>
+					<td>Set zero flag</td>
+				</tr>
+				<tr>
+					<td><code>clz</code></td>
+					<td>Clear zero flag</td>
+				</tr>
+				<tr>
+					<td><code>stn</code></td>
+					<td>Set negative flag</td>
+				</tr>
+				<tr>
+					<td><code>cln</code></td>
+					<td>Clear negative flag</td>
+				</tr>
+				<tr>
+					<td><code>stc</code></td>
+					<td>Set carry flag</td>
+				</tr>
+				<tr>
+					<td><code>clc</code></td>
+					<td>Clear carry flag</td>
+				</tr>
+				<tr>
+					<td><code>sto</code></td>
+					<td>Set overflow flag</td>
+				</tr>
+				<tr>
+					<td><code>clo</code></td>
+					<td>Clear overflow flag</td>
+				</tr>
+			</table>
+
+			<h3>Subtraction</h3>
+			<code class="subheading">sub dst,src</code>
+			<p>
+				<code>sub dst,src</code> &rarr; <code>dst = dst - src</code>
+			</p>
+			<p>
+				<code>dst</code> is the left hand operand and destination of
+				the subtraction. It can be one of <code>dr</code>,
+				<code>cp</code>, or <code>cp</code>.
+			</p>
+			<p>
+				<code>src</code> is the right hand operand of the subtraction.
+				It can be one of <code>dr</code>, <code>[cp]</code>, or an
+				immediate 16-bit value.
+			</p>
+
+			<h3>Comparison</h3>
+			<code class="subheading">cmp op1,op2</code>
+			<p>
+				The comparison instruction compares two values.
+			</p>
+
+			<h3>NAND</h3>
+			<code class="subheading">
+				nand dst,src<br>
+				nandt dst,src
+			</code>
+
+			<p>
+				Performs bitwise NAND on <code>dst</code> and <code>src</code>.
+				<code>dst = dst &uarr; src</code>
+			</p>
+			<p>
+				<code>dst</code> may be either <code>[cp]</code> or
+				<code>dr</code>
+			</p>
+			<p>
+				<code>src</code> may be either <code>dr</code> or an immediate
+				16-bit value.
+			</p>
+			<p>
+				<code>nandt</code> stands for NAND-test. It performs the
+				operation and updates flags, but doesn't store the result.
+			</p>
+
+			<h3>Left shift</h3>
+			<code class="subheading">
+				lsl src,dst<br>
+				lslt src,dst
+			</code>
+
+			<p>
+				Shifts <code>dst</code> left by <code>src</code> bits.
+				<code>dst = dst &lt;&lt; src</code>
+			</p>
+			<p>
+				<code>dst</code> may be either <code>[cp]</code> or
+				<code>dr</code>
+			</p>
+			<p>
+				<code>src</code> may be either <code>dr</code> or an immediate
+				16-bit value.
+			</p>
+			<p>
+				<code>lslt</code> stands for left-shift-test. It performs the
+				operation and updates flags, but doesn't store the result.
+			</p>
+
+			<h3>Logical Right Shift</h3>
+			<code class="subheading">
+				lsl src,dst<br>
+				lsrt src,dst
+			</code>
+
+			<p>
+				Shifts <code>dst</code> right by <code>src</code> bits, filling
+				the rightmost bits with zeroes.
+				<code>dst = dst &gt;&gt;&gt; src</code>
+			</p>
+			<p>
+				<code>dst</code> may be either <code>[cp]</code> or
+				<code>dr</code>
+			</p>
+			<p>
+				<code>src</code> may be either <code>dr</code> or an immediate
+				16-bit value.
+			</p>
+			<p>
+				<code>lsrt</code> stands for logical-right-shift-test. It
+				performs the operation and updates flags, but doesn't store the
+				result.
+			</p>
+
+			<h3>Arithmetic Right Shift</h3>
+			<code class="subheading">
+				asr src,dst<br>
+				asrt src,dst
+			</code>
+
+			<p>
+				Shifts <code>dst</code> right by <code>src</code> bits, filling
+				the rightmost bits copies of the original most significant bit.
+				<code>dst = dst &gt;&gt; src</code>
+			</p>
+			<p>
+				<code>dst</code> may be either <code>[cp]</code> or
+				<code>dr</code>
+			</p>
+			<p>
+				<code>src</code> may be either <code>dr</code> or an immediate
+				16-bit value.
+			</p>
+			<p>
+				<code>asrt</code> stands for arithmetic-right-shift-test. It
+				performs the operation and updates flags, but doesn't store the
+				result.
+			</p>
+
+			<h3>Load data</h3>
+			<code class="subheading">
+				ld dst,src
+			</code>
+
+			<p>
+				Loads data from <code>src</code> to <code>dst</code>.
+			</p>
+			<p>
+				<code>dst</code> can be one of <code>dr</code>.
+			</p>
+			<p>
+				<code>src</code> can be one of <code>[cp]</code>, or an
+				immediate 16-bit value.
+			</p>
+
+			<h3>Store register in cell</h3>
+			<p>
+				The <code>str</code> instruction stores <code>dr</code> in the current cell.
+			</p>
+		</main>
+	</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Kernel Panic | Esoterix</title>
+
+		<link rel="stylesheet" type="text/css" href="/docs.css" />
+
+		<script src="/toc.js"></script>
+	</head>
+	<body>
+		<div id="toc" class="toc-no-heading"></div>
+		<main>
+			<h1 class="toc-exclude">Kernel Panic</h1>
+			<p>
+				A kernel panic occurs when a fatal error occurs which the
+				kernel is unable to recover from. A kernel panic will print
+				a generic message and an error code to UART1:
+			</p>
+<pre>
+Kernel panic. Code xx
+</pre>
+			<p>
+				Where <code>xx</code> is a hexadecimal error code. If an error
+				occurs during the panic, or if some other factor prevents the
+				error message from printing, the error code is also stored in
+				register <code>r10</code>, which is guaranteed to not be
+				overwritten at any point during a kernel panic.
+			</p>
+		</main>
+	</body>
+</html>
